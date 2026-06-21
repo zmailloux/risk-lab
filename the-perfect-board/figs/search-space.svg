@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Search space of territories versus countries. The buildable winning boards cluster small, 8 to 9 countries and roughly 40 to 53 territories, near World Risk's size; the big-board region that scored about 95 was an all-war mirage inflated by un-buildable hubs.">
+          <text x="30" y="28" font-family="system-ui" font-size="17" font-weight="700" fill="#222">Where the good boards really live</text>
+          <text x="30" y="50" font-family="system-ui" font-size="12.5" fill="#777">each dot a board · the buildable winners are <tspan font-weight="700" fill="#2e7d46">small</tspan> (8–9 countries, ~40–53 territories)</text>
+          <line x1="60" y1="520" x2="560" y2="520" stroke="#ccc"/>
+          <line x1="60" y1="80" x2="60" y2="520" stroke="#ccc"/>
+          <g font-family="system-ui" font-size="10.5" fill="#999">
+            <text x="100" y="538" text-anchor="middle">42</text><text x="210" y="538" text-anchor="middle">55</text>
+            <text x="330" y="538" text-anchor="middle">65</text><text x="420" y="538" text-anchor="middle">74</text>
+            <text x="560" y="538" text-anchor="middle">88</text>
+            <text x="48" y="524" text-anchor="end">6</text><text x="48" y="377" text-anchor="end">8</text>
+            <text x="48" y="304" text-anchor="end">9</text><text x="48" y="231" text-anchor="end">10</text><text x="48" y="84" text-anchor="end">12</text>
+          </g>
+          <text x="310" y="562" text-anchor="middle" font-family="system-ui" font-size="11.5" fill="#777">territories →</text>
+          <text x="22" y="300" text-anchor="middle" font-family="system-ui" font-size="11.5" fill="#777" transform="rotate(-90 22 300)">countries →</text>
+          <polygon points="60,80 300,80 80,373 60,373" fill="#f7e4e4" opacity="0.55"/>
+          <text x="92" y="150" font-family="system-ui" font-size="11" font-weight="700" fill="#c0504a">fragmentation</text>
+          <text x="92" y="166" font-family="system-ui" font-size="10.5" fill="#c0726c">too few territories / country</text>
+          <rect x="420" y="329" width="140" height="88" rx="6" fill="#f0f0f0" stroke="#bbb" stroke-dasharray="5 3"/>
+          <text x="490" y="356" text-anchor="middle" font-family="system-ui" font-size="11.5" font-weight="700" fill="#999" text-decoration="line-through">all-war mirage</text>
+          <text x="490" y="372" text-anchor="middle" font-family="system-ui" font-size="10" fill="#aaa">scored ~95, but un-buildable</text>
+          <text x="490" y="386" text-anchor="middle" font-family="system-ui" font-size="10" fill="#aaa">(cross-map hubs)</text>
+          <rect x="80" y="266" width="146" height="128" rx="7" fill="#e9f5ec" stroke="#4a9a63" stroke-width="1.4"/>
+          <text x="153" y="254" text-anchor="middle" font-family="system-ui" font-size="12.5" font-weight="700" fill="#2e7d46">buildable winners</text>
+          <text x="153" y="412" text-anchor="middle" font-family="system-ui" font-size="10.5" fill="#3f8f57">8–9c · ~40–53t · ≤ 87</text>
+          <g fill="#b9c6d4">
+            <circle cx="440" cy="352" r="6"/><circle cx="472" cy="338" r="6"/><circle cx="505" cy="360" r="6"/>
+            <circle cx="535" cy="344" r="6"/><circle cx="430" cy="386" r="6"/><circle cx="548" cy="372" r="6"/>
+            <circle cx="362" cy="332" r="6"/><circle cx="300" cy="362" r="6"/>
+          </g>
+          <g fill="#3f9d5e">
+            <circle cx="98" cy="302" r="6"/><circle cx="118" cy="342" r="6"/><circle cx="152" cy="288" r="6"/>
+            <circle cx="178" cy="322" r="6"/><circle cx="202" cy="302" r="6"/><circle cx="108" cy="372" r="6"/>
+            <circle cx="172" cy="376" r="6"/><circle cx="200" cy="352" r="6"/>
+          </g>
+          <circle cx="100" cy="515" r="7" fill="#fff" stroke="#222" stroke-width="2.4"/><circle cx="100" cy="515" r="2.5" fill="#222"/>
+          <text x="114" y="519" font-family="system-ui" font-size="11.5" font-weight="700" fill="#234">World 42t/6c</text>
+          <circle cx="330" cy="300" r="7" fill="#fff" stroke="#222" stroke-width="2.4"/><circle cx="330" cy="300" r="2.5" fill="#222"/>
+          <text x="344" y="304" font-family="system-ui" font-size="11.5" font-weight="700" fill="#234">LotR 65t/9c</text>
+          <circle cx="132" cy="300" r="10" fill="none" stroke="#2e7d46" stroke-width="2.6"/><circle cx="132" cy="300" r="5" fill="#2e7d46"/>
+          <text x="132" y="285" text-anchor="middle" font-family="system-ui" font-size="11" font-weight="700" fill="#2e7d46">#682232 · 9c/45t · 87.0</text>
+        </svg>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 600 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Win rate by opening strategy: small-country 57 percent dwarfs the fair share of 17 percent.">
+          <text x="0" y="18" font-family="system-ui" font-size="14" font-weight="700" fill="#222">Win rate by opening (fair share = 17%)</text>
+          <!-- fair-share line at x for 17%: bars start x=140, width scale 360px=60% -> px per % =6 -->
+          <line x1="242" y1="34" x2="242" y2="232" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="246" y="46" font-family="system-ui" font-size="10" fill="#c0392b">17%</text>
+          <g font-family="system-ui" font-size="12.5" fill="#333">
+            <!-- y rows every 32 from 60 -->
+            <text x="0" y="72">small-country</text>
+            <rect x="140" y="60" width="342" height="20" rx="3" fill="#e6550d"/>
+            <text x="490" y="75" font-size="12" font-weight="700" fill="#e6550d">57%</text>
+
+            <text x="0" y="104">random</text>
+            <rect x="140" y="92" width="84" height="20" rx="3" fill="#3182bd"/>
+            <text x="232" y="107" font-size="12" font-weight="700" fill="#3182bd">14%</text>
+
+            <text x="0" y="136">blocker</text>
+            <rect x="140" y="124" width="72" height="20" rx="3" fill="#6aaed6"/>
+            <text x="220" y="139" font-size="12" fill="#555">12%</text>
+
+            <text x="0" y="168">spread</text>
+            <rect x="140" y="156" width="48" height="20" rx="3" fill="#9ecae1"/>
+            <text x="196" y="171" font-size="12" fill="#555">8%</text>
+
+            <text x="0" y="200">border-fortress</text>
+            <rect x="140" y="188" width="36" height="20" rx="3" fill="#c6dbef"/>
+            <text x="184" y="203" font-size="12" fill="#555">6%</text>
+
+            <text x="0" y="232">concentrate</text>
+            <rect x="140" y="220" width="18" height="20" rx="3" fill="#dbe9f6"/>
+            <text x="166" y="235" font-size="12" fill="#555">3%</text>
+          </g>
+        </svg>

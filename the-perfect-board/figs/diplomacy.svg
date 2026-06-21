@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diplomacy as a state the AI consults: open war, a truce that forms in play and holds, betrayal that resolves the board, and a swarm that fires when a leader crosses fifty percent.">
+        <defs><marker id="a4" markerWidth="10" markerHeight="10" refX="7.5" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 Z" fill="#7795b3"/></marker>
+          <marker id="a4r" markerWidth="10" markerHeight="10" refX="7.5" refY="3.5" orient="auto"><path d="M0,0 L8,3.5 L0,7 Z" fill="#c0392b"/></marker></defs>
+        <text x="20" y="30" font-family="system-ui" font-size="18" font-weight="700" fill="#222">Diplomacy is a state the AI consults</text>
+        <text x="20" y="50" font-family="system-ui" font-size="12.5" fill="#999">every pact forms <tspan font-weight="700" fill="#777">during play</tspan> — never before placing</text>
+
+        <g font-family="system-ui">
+          <!-- WAR -->
+          <rect x="55" y="120" width="180" height="86" rx="12" fill="#fff" stroke="#9aa3ad" stroke-width="2"/>
+          <text x="145" y="158" text-anchor="middle" font-size="16" font-weight="700" fill="#444">Open war</text>
+          <text x="145" y="180" text-anchor="middle" font-size="11.5" fill="#888">default · all-war</text>
+          <text x="145" y="196" text-anchor="middle" font-size="11.5" fill="#888">baseline</text>
+
+          <!-- TRUCE -->
+          <rect x="390" y="66" width="200" height="96" rx="12" fill="#eef4fb" stroke="#3182bd" stroke-width="2"/>
+          <text x="490" y="104" text-anchor="middle" font-size="16" font-weight="700" fill="#234">Truce</text>
+          <text x="490" y="126" text-anchor="middle" font-size="11.5" fill="#557">border-scoped, one</text>
+          <text x="490" y="142" text-anchor="middle" font-size="11.5" fill="#557">per seat · neither</text>
+          <text x="490" y="158" text-anchor="middle" font-size="11.5" fill="#557">target nor threat</text>
+
+          <!-- BETRAYAL -->
+          <rect x="745" y="120" width="180" height="86" rx="12" fill="#fdeee6" stroke="#e6550d" stroke-width="2"/>
+          <text x="835" y="158" text-anchor="middle" font-size="16" font-weight="700" fill="#a8430b">Betrayal</text>
+          <text x="835" y="180" text-anchor="middle" font-size="11.5" fill="#b5683a">break to progress</text>
+          <text x="835" y="196" text-anchor="middle" font-size="11.5" fill="#b5683a">when boxed in</text>
+
+          <!-- SWARM -->
+          <rect x="360" y="368" width="240" height="100" rx="12" fill="#f1eef8" stroke="#756bb1" stroke-width="2"/>
+          <text x="480" y="406" text-anchor="middle" font-size="16" font-weight="700" fill="#534a86">Swarm</text>
+          <text x="480" y="428" text-anchor="middle" font-size="11.5" fill="#6a5fa0">a 50%-leader's allies</text>
+          <text x="480" y="444" text-anchor="middle" font-size="11.5" fill="#6a5fa0">revolt — every truce</text>
+          <text x="480" y="460" text-anchor="middle" font-size="11.5" fill="#6a5fa0">they hold breaks at once</text>
+        </g>
+
+        <!-- transitions -->
+        <g font-family="system-ui" font-size="11.5">
+          <!-- war -> truce -->
+          <path d="M235,150 C310,120 340,110 388,108" fill="none" stroke="#7795b3" stroke-width="2" marker-end="url(#a4)"/>
+          <text x="300" y="98" text-anchor="middle" fill="#557">round ≥ 1 · shared border</text>
+          <!-- truce self-loop -->
+          <path d="M455,66 C455,28 525,28 525,66" fill="none" stroke="#3182bd" stroke-width="1.8" marker-end="url(#a4)"/>
+          <text x="490" y="22" text-anchor="middle" fill="#3182bd">holds ~4–8 rounds</text>
+          <!-- truce -> betrayal -->
+          <path d="M590,118 C660,110 700,120 743,140" fill="none" stroke="#e6843c" stroke-width="2" marker-end="url(#a4)"/>
+          <text x="668" y="106" text-anchor="middle" fill="#a8430b">turn on the partner</text>
+          <!-- betrayal -> war (bottom return) -->
+          <path d="M835,206 L835,250 L145,250 L145,208" fill="none" stroke="#7795b3" stroke-width="2" marker-end="url(#a4)"/>
+          <text x="490" y="244" text-anchor="middle" fill="#557">breaks → board resolves → open war again</text>
+          <!-- truce -> swarm trigger -->
+          <path d="M470,162 C455,250 460,300 472,366" fill="none" stroke="#c0392b" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#a4r)"/>
+          <text x="372" y="300" text-anchor="middle" fill="#c0392b">leader crosses</text>
+          <text x="372" y="316" text-anchor="middle" fill="#c0392b" font-weight="700">50% → revolt</text>
+          <!-- swarm -> war -->
+          <path d="M360,402 C250,380 220,300 185,210" fill="none" stroke="#756bb1" stroke-width="2" marker-end="url(#a4)"/>
+          <text x="232" y="320" text-anchor="middle" fill="#6a5fa0">truces shatter</text>
+        </g>
+
+        <!-- stat chips -->
+        <g font-family="system-ui" font-size="11.5">
+          <rect x="640" y="372" width="290" height="44" rx="9" fill="#fff" stroke="#e3e3e3"/>
+          <text x="656" y="392" font-weight="700" fill="#234">betrayer win 17%</text><text x="772" y="392" fill="#888">≈ fair share — no premium</text>
+          <text x="656" y="408" fill="#888">a held truce instead <tspan font-weight="700" fill="#c0392b">stalls</tspan> the game to the cap</text>
+          <rect x="640" y="424" width="290" height="34" rx="9" fill="#f1eef8" stroke="#d8d2ec"/>
+          <text x="656" y="445" fill="#534a86"><tspan font-weight="700">swarm fires ~51–68%</tspan> of games with alliances</text>
+        </g>
+      </svg>

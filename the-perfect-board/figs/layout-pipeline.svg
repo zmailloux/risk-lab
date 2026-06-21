@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The layout pipeline in three panels: an abstract node graph becomes a physical board with a landmass, island and sea route, then snaps onto editor hexes as a MapDocument.">
+      <defs><marker id="a11" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto"><path d="M0,0 L9,4 L0,8 Z" fill="#7795b3"/></marker>
+        <linearGradient id="sea11" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcefff"/><stop offset="1" stop-color="#bfe2f5"/></linearGradient></defs>
+
+      <!-- PANEL 1: node graph -->
+      <rect x="20" y="40" width="350" height="300" rx="12" fill="#fff" stroke="#cdd9e3"/>
+      <text x="40" y="68" font-family="system-ui" font-size="13" font-weight="700" fill="#234">1 · vetted node graph</text>
+      <g stroke="#aab4be" stroke-width="1.6">
+        <line x1="110" y1="150" x2="150" y2="120"/><line x1="110" y1="150" x2="135" y2="200"/><line x1="150" y1="120" x2="210" y2="135"/>
+        <line x1="210" y1="135" x2="250" y2="170"/><line x1="210" y1="135" x2="270" y2="125"/><line x1="250" y1="170" x2="230" y2="225"/>
+        <line x1="135" y1="200" x2="190" y2="245"/><line x1="190" y1="245" x2="230" y2="225"/><line x1="270" y1="125" x2="300" y2="185"/>
+        <line x1="250" y1="170" x2="300" y2="185"/>
+        <line x1="135" y1="200" x2="230" y2="225" stroke="#cdd9e3" stroke-dasharray="4,4"/>
+      </g>
+      <g stroke="#333" stroke-width="1.2">
+        <circle cx="110" cy="150" r="11" fill="#e6550d"/><circle cx="150" cy="120" r="11" fill="#e6550d"/><circle cx="135" cy="200" r="11" fill="#e6550d"/>
+        <circle cx="210" cy="135" r="11" fill="#31a354"/><circle cx="270" cy="125" r="11" fill="#31a354"/>
+        <circle cx="250" cy="170" r="11" fill="#3182bd"/><circle cx="300" cy="185" r="11" fill="#3182bd"/>
+        <circle cx="190" cy="245" r="11" fill="#756bb1"/><circle cx="230" cy="225" r="11" fill="#756bb1"/>
+      </g>
+      <text x="195" y="316" text-anchor="middle" font-family="system-ui" font-size="11" fill="#999">territories · countries · adjacency</text>
+
+      <!-- arrow -->
+      <line x1="378" y1="190" x2="418" y2="190" stroke="#7795b3" stroke-width="2.6" marker-end="url(#a11)"/>
+
+      <!-- PANEL 2: physical layout -->
+      <rect x="425" y="40" width="350" height="300" rx="12" fill="url(#sea11)" stroke="#cdd9e3"/>
+      <text x="445" y="68" font-family="system-ui" font-size="13" font-weight="700" fill="#1d4f6b">2 · physical layout</text>
+      <!-- mainland -->
+      <path d="M470,150 C470,110 540,95 590,110 C645,100 700,120 705,165 C740,200 700,255 640,260 C600,300 520,300 495,260 C455,245 450,185 470,150 Z" fill="#cfe6c4" stroke="#7fae6b" stroke-width="2"/>
+      <!-- country tint blobs -->
+      <circle cx="540" cy="160" r="34" fill="#e6550d" fill-opacity="0.30"/>
+      <circle cx="620" cy="160" r="34" fill="#31a354" fill-opacity="0.30"/>
+      <circle cx="575" cy="230" r="34" fill="#3182bd" fill-opacity="0.30"/>
+      <!-- island -->
+      <path d="M690,290 C690,272 715,266 730,274 C748,272 752,296 738,306 C726,320 698,316 690,300 Z" fill="#cfe6c4" stroke="#7fae6b" stroke-width="2"/>
+      <circle cx="718" cy="292" r="16" fill="#756bb1" fill-opacity="0.30"/>
+      <!-- sea route -->
+      <path d="M648,255 C672,272 688,280 706,286" fill="none" stroke="#2b6f99" stroke-width="2" stroke-dasharray="6,5"/>
+      <text x="700" y="252" font-family="system-ui" font-size="10" fill="#2b6f99">sea route</text>
+      <!-- mountain barrier along a border -->
+      <g fill="#8a6d4a" stroke="#5c4528" stroke-width="0.8">
+        <polygon points="572,150 580,132 588,150"/><polygon points="584,152 592,130 600,152"/><polygon points="596,150 604,134 612,150"/>
+      </g>
+      <text x="600" y="316" text-anchor="middle" font-family="system-ui" font-size="11" fill="#3a6377">landmass · island · sea lanes · barriers</text>
+
+      <!-- arrow -->
+      <line x1="783" y1="190" x2="823" y2="190" stroke="#7795b3" stroke-width="2.6" marker-end="url(#a11)"/>
+
+      <!-- PANEL 3: editor hexes -->
+      <rect x="830" y="40" width="350" height="300" rx="12" fill="#fff" stroke="#cdd9e3"/>
+      <text x="850" y="68" font-family="system-ui" font-size="13" font-weight="700" fill="#234">3 · editor hexes</text>
+      <g stroke="#fff" stroke-width="1.5">
+        <polygon points="920,150 910,167 890,167 880,150 890,133 910,133" fill="#e6550d"/>
+        <polygon points="920,184 910,201 890,201 880,184 890,167 910,167" fill="#e6550d"/>
+        <polygon points="920,218 910,235 890,235 880,218 890,201 910,201" fill="#e6550d"/>
+        <polygon points="950,167 940,184 920,184 910,167 920,150 940,150" fill="#e6550d"/>
+        <polygon points="950,201 940,218 920,218 910,201 920,184 940,184" fill="#3182bd"/>
+        <polygon points="980,150 970,167 950,167 940,150 950,133 970,133" fill="#31a354"/>
+        <polygon points="980,184 970,201 950,201 940,184 950,167 970,167" fill="#31a354"/>
+        <polygon points="980,218 970,235 950,235 940,218 950,201 970,201" fill="#3182bd"/>
+        <polygon points="1010,167 1000,184 980,184 970,167 980,150 1000,150" fill="#31a354"/>
+        <polygon points="1010,201 1000,218 980,218 970,201 980,184 1000,184" fill="#756bb1"/>
+        <polygon points="1010,235 1000,252 980,252 970,235 980,218 1000,218" fill="#756bb1"/>
+        <polygon points="1040,184 1030,201 1010,201 1000,184 1010,167 1030,167" fill="#31a354"/>
+        <polygon points="1040,218 1030,235 1010,235 1000,218 1010,201 1030,201" fill="#756bb1"/>
+        <polygon points="950,235 940,252 920,252 910,235 920,218 940,218" fill="#3182bd"/>
+      </g>
+      <text x="1005" y="316" text-anchor="middle" font-family="system-ui" font-size="11" fill="#999">editable, playable <tspan font-style="italic">MapDocument</tspan></text>
+    </svg>
