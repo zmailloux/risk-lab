@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>In Search of the Perfect 6-Player Risk Board</title>
+<title>Using AI to Make the Perfect Risk Board (and It Looks Awful)</title>
 <!--
-  Self-contained showcase for risk-lab (research-paper.md, Appendix A).
+  Self-contained showcase for risk-lab (Appendix A).
   Inline CSS + inline SVG; the board PNGs (FIG-1 hero, FIG-8a node map + FIG-8b permutations)
   are co-located real assets copied from references/ so the site/-only Pages subtree carries them.
   The remaining figures (FIG-2b/3/4/5/6/7/9/10) are inline-SVG mock-ups built from
@@ -180,6 +180,23 @@
  .toc .arr{color:#cbd3da;font-size:.8rem;user-select:none}
  section[id]{scroll-margin-top:1rem}
 
+ /* player-style profiles */
+ .pmeta{font-size:.82rem;color:var(--muted);margin:.1rem 0 .7rem}
+ .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:.2rem 0 .2rem}
+ @media(max-width:720px){.pgrid{grid-template-columns:repeat(2,1fr)}}
+ @media(max-width:440px){.pgrid{grid-template-columns:1fr}}
+ .pcard{display:flex;gap:.7rem;border:1px solid var(--line);border-radius:11px;background:#fff;padding:.7rem .8rem}
+ .pcard .av{flex:none;width:52px;height:52px}
+ .pcard .nm{font-size:.95rem;font-weight:700;color:#222;line-height:1.15}
+ .pcard .st{font-size:.67rem;color:var(--muted);font-weight:700;letter-spacing:.04em;
+   margin:.1rem 0 .28rem;font-family:ui-monospace,Menlo,Consolas,monospace}
+ .pcard p{margin:0;font-size:.8rem;color:#555;line-height:1.42}
+ .pcard .wr{display:inline-block;margin-top:.4rem;font-size:.7rem;font-weight:700;border-radius:999px;
+   padding:.1rem .55rem;background:#eef2f6;color:#5b6b7a}
+ .pcard .wr.win{background:#e3f3e9;color:#2e8b50}
+ .pcard .trait{display:inline-block;margin-top:.4rem;font-size:.68rem;font-weight:700;border-radius:999px;
+   padding:.1rem .55rem;background:#f1eef8;color:#6a5fa0;font-family:ui-monospace,Menlo,Consolas,monospace}
+
  @media print{
    .toc{display:none}
    body{font-size:11px}
@@ -209,12 +226,16 @@
 <!-- ============================ HERO ============================ -->
 <header class="hero"><div class="wrap">
   <p class="eyebrow">Risk Lab · a measurement story</p>
-  <h1>In Search of the Perfect 6-Player Risk Board</h1>
-  <p class="thesis lead">Is the classic 42-territory, 6-country board actually the
-    <em>best</em> board for six players — or just the <em>familiar</em> one? We decided
-    to find out the only honest way: by treating a board as a vector we could
-    generate, mutate, and play <strong>millions</strong> of times.</p>
+  <h1>Using AI to Make the Perfect Risk Board<span style="display:block;color:var(--muted);font-weight:600;font-size:.42em;letter-spacing:0;margin-top:.3rem">…and it looks awful</span></h1>
+  <p class="thesis lead">Turns out you can hand the whole thing to AI: generate boards, simulate
+    <strong>millions</strong> of games, and measure a path to a board that's fairer and more fun than
+    the one in the box. The twist? It aced the part everyone calls hard — the logic and the balance —
+    and fell flat on the part everyone calls easy: making it <em>look</em> like something you'd want
+    to play. The math was the easy half.</p>
   <p class="byline">By <b>Zach Mailloux</b><span class="sep">·</span><time datetime="2026-06-21">June 21, 2026</time></p>
+  <p class="muted" style="font-size:.8rem;margin:.3rem 0 0">A note on authorship: the project — the
+    idea, the simulator, and every iteration — is mine; much of this writeup itself was drafted by AI
+    and edited by me.</p>
 
   <div class="stats">
     <div class="stat"><b>45,000+</b><span>board permutations explored</span></div>
@@ -224,20 +245,30 @@
   <p class="muted" style="font-size:.82rem;margin:.5rem 0 0">Every number on this page traces to a
     logged experiment in <code>risk-lab</code>. The flash rides on real measurements — never instead of them.</p>
   <figure style="margin:1.3rem 0 0">
-    <img src="viable-png/fig6-perm1.png" alt="The chosen board — 9c/45t #682232 — rendered as a physical Risk board: one continent of nine colour-coded countries, an island on a sea route, mountain barriers.">
+    <img src="the-board.svg" alt="The chosen board — 9c/45t #682232 — rendered as a physical Risk world: three continents of colour-coded countries linked by ocean shipping lanes, with mountain ranges and rivers marking the borders you cannot attack across.">
+    <div style="margin:.7rem 0;padding:.8rem 1rem;border:3px solid #d11;border-radius:10px;
+      background:#fff3f3;color:#c00;font-weight:800;font-size:1.15rem;line-height:1.4;
+      text-align:center;text-transform:uppercase;letter-spacing:.02em">
+      ⚠ Draft layout — the ocean routes are messy for now.<br>
+      <span style="font-size:.95rem">This can be massaged into a semi-uniform map with cleaner,
+      more deliberate naval routes in the future.</span>
+    </div>
     <figcaption><b>FIG-1.</b> The payoff — the chosen board, <strong>9c/45t #682232</strong>
-      (realistic composite 87.0, beats World Risk), rendered as a real, playable board.</figcaption>
+      (realistic composite 87.0, beats World Risk), drawn as a faithful physical world:
+      <strong>three continents</strong> linked by sea lanes, where <strong>60 of its 76 attacks
+      are real land borders</strong>, 14 are ocean routes, and every pair that touches but
+      can't attack is walled off by a mountain or river. Click to enlarge.</figcaption>
   </figure>
 </div></header>
 
 <div class="wrap">
 
 <aside class="premise">
-  <span class="lbl">The premise — what we're deliberately leaving out</span>
+  <span class="lbl">The premise — what I'm deliberately leaving out</span>
   <p>Honest caveat first: most of what makes Risk fun is the <strong>people</strong> — the table
     talk, the shifting alliances, the betrayal you'll never live down. That social theatre matters
     more than any map, and no metric here pretends to capture it. This study brackets it off on
-    purpose. The question we're chasing is the narrower, measurable one: <strong>strip most of the
+    purpose. The question I'm chasing is the narrower, measurable one: <strong>strip most of the
     human element away, and how good can the board itself be?</strong> Everything below is the
     structural half of the answer — what shape the <em>perfect</em> Risk board takes when judged on
     its bones alone.</p>
@@ -247,7 +278,7 @@
   <a href="#question"><b>1</b>The question</a><span class="arr">›</span>
   <a href="#players"><b>2</b>The players</a><span class="arr">›</span>
   <a href="#matrix"><b>3</b>The matrix</a><span class="arr">›</span>
-  <a href="#measure"><b>4</b>How we measured</a><span class="arr">›</span>
+  <a href="#measure"><b>4</b>How I measured</a><span class="arr">›</span>
   <a href="#results"><b>5</b>What it said</a><span class="arr">›</span>
   <a href="#map"><b>6</b>Into a map</a>
 </nav>
@@ -258,12 +289,16 @@
   <div class="cols">
     <div>
       <p>Classic Risk is the baseline everyone knows. But "everyone knows it" is not the
-        same as "it's the best six-player board." So we stopped arguing and started
+        same as "it's the best six-player board." So I stopped arguing and started
         measuring.</p>
       <p>The trick is to stop thinking of a board as a <em>place</em> and start thinking of
         it as a <strong>vector</strong>: a list of territories, a set of countries each with a
         troop bonus, and an adjacency graph of who can attack whom. Stated that way, a
         board is just data — and data can be <strong>generated, mutated, and scored</strong>.</p>
+      <p class="muted" style="font-size:.86rem">A note on words: what classic Risk calls a
+        <em>continent</em> (a bonus-bearing group of territories) I call a <strong>country</strong>
+        throughout. Once the generator starts inventing brand-new boards, the groups aren't Earth's
+        continents anymore — so the generic name fits the permutations better.</p>
       <p><strong>Success</strong> = a board that beats the classic baseline on a blend of
         <em>balance</em> and <em>fun</em> <em>without</em> a degenerate read: no unbeatable
         fortress country, no kingmaker turn order, no permanent snowball.</p>
@@ -288,10 +323,11 @@
         <svg viewBox="0 0 1400 1000" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Node-link diagram of the classic Risk board, its six continents kept in their world-map positions: North America upper-left, South America lower-left, Europe upper-centre, Africa centre, Asia upper-right, Australia lower-right. 42 territories in 6 colour-coded countries, 83 adjacency edges, dashed sea routes, and two ringed chokepoints."><line x1="140" y1="175" x2="255" y2="150" stroke="#888" stroke-width="1.8"/><line x1="140" y1="175" x2="235" y2="265" stroke="#888" stroke-width="1.8"/><line x1="140" y1="175" x2="1280" y2="165" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="255" y1="150" x2="430" y2="110" stroke="#888" stroke-width="1.8"/><line x1="255" y1="150" x2="235" y2="265" stroke="#888" stroke-width="1.8"/><line x1="255" y1="150" x2="330" y2="255" stroke="#888" stroke-width="1.8"/><line x1="430" y1="110" x2="330" y2="255" stroke="#888" stroke-width="1.8"/><line x1="430" y1="110" x2="430" y2="235" stroke="#888" stroke-width="1.8"/><line x1="430" y1="110" x2="560" y2="180" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="235" y1="265" x2="330" y2="255" stroke="#888" stroke-width="1.8"/><line x1="235" y1="265" x2="260" y2="375" stroke="#888" stroke-width="1.8"/><line x1="330" y1="255" x2="430" y2="235" stroke="#888" stroke-width="1.8"/><line x1="330" y1="255" x2="260" y2="375" stroke="#888" stroke-width="1.8"/><line x1="330" y1="255" x2="375" y2="360" stroke="#888" stroke-width="1.8"/><line x1="430" y1="235" x2="375" y2="360" stroke="#888" stroke-width="1.8"/><line x1="260" y1="375" x2="375" y2="360" stroke="#888" stroke-width="1.8"/><line x1="260" y1="375" x2="300" y2="460" stroke="#888" stroke-width="1.8"/><line x1="375" y1="360" x2="300" y2="460" stroke="#888" stroke-width="1.8"/><line x1="300" y1="460" x2="340" y2="630" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="340" y1="630" x2="320" y2="745" stroke="#888" stroke-width="1.8"/><line x1="340" y1="630" x2="430" y2="730" stroke="#888" stroke-width="1.8"/><line x1="320" y1="745" x2="430" y2="730" stroke="#888" stroke-width="1.8"/><line x1="320" y1="745" x2="360" y2="860" stroke="#888" stroke-width="1.8"/><line x1="430" y1="730" x2="360" y2="860" stroke="#888" stroke-width="1.8"/><line x1="430" y1="730" x2="630" y2="540" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="560" y1="180" x2="700" y2="165" stroke="#888" stroke-width="1.8"/><line x1="560" y1="180" x2="575" y2="300" stroke="#888" stroke-width="1.8"/><line x1="700" y1="165" x2="815" y2="250" stroke="#888" stroke-width="1.8"/><line x1="700" y1="165" x2="575" y2="300" stroke="#888" stroke-width="1.8"/><line x1="700" y1="165" x2="690" y2="295" stroke="#888" stroke-width="1.8"/><line x1="815" y1="250" x2="690" y2="295" stroke="#888" stroke-width="1.8"/><line x1="815" y1="250" x2="705" y2="390" stroke="#888" stroke-width="1.8"/><line x1="815" y1="250" x2="905" y2="250" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="815" y1="250" x2="920" y2="365" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="815" y1="250" x2="855" y2="475" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="575" y1="300" x2="690" y2="295" stroke="#888" stroke-width="1.8"/><line x1="575" y1="300" x2="590" y2="400" stroke="#888" stroke-width="1.8"/><line x1="690" y1="295" x2="590" y2="400" stroke="#888" stroke-width="1.8"/><line x1="690" y1="295" x2="705" y2="390" stroke="#888" stroke-width="1.8"/><line x1="590" y1="400" x2="705" y2="390" stroke="#888" stroke-width="1.8"/><line x1="590" y1="400" x2="630" y2="540" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="705" y1="390" x2="630" y2="540" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="705" y1="390" x2="765" y2="510" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="705" y1="390" x2="855" y2="475" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="630" y1="540" x2="765" y2="510" stroke="#888" stroke-width="1.8"/><line x1="630" y1="540" x2="805" y2="630" stroke="#888" stroke-width="1.8"/><line x1="630" y1="540" x2="695" y2="660" stroke="#888" stroke-width="1.8"/><line x1="765" y1="510" x2="805" y2="630" stroke="#888" stroke-width="1.8"/><line x1="765" y1="510" x2="855" y2="475" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="805" y1="630" x2="695" y2="660" stroke="#888" stroke-width="1.8"/><line x1="805" y1="630" x2="720" y2="800" stroke="#888" stroke-width="1.8"/><line x1="805" y1="630" x2="845" y2="765" stroke="#888" stroke-width="1.8"/><line x1="805" y1="630" x2="855" y2="475" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="695" y1="660" x2="720" y2="800" stroke="#888" stroke-width="1.8"/><line x1="720" y1="800" x2="845" y2="765" stroke="#888" stroke-width="1.8"/><line x1="905" y1="250" x2="1000" y2="195" stroke="#888" stroke-width="1.8"/><line x1="905" y1="250" x2="920" y2="365" stroke="#888" stroke-width="1.8"/><line x1="905" y1="250" x2="1035" y2="390" stroke="#888" stroke-width="1.8"/><line x1="1000" y1="195" x2="1130" y2="130" stroke="#888" stroke-width="1.8"/><line x1="1000" y1="195" x2="1095" y2="230" stroke="#888" stroke-width="1.8"/><line x1="1000" y1="195" x2="1140" y2="335" stroke="#888" stroke-width="1.8"/><line x1="1000" y1="195" x2="1035" y2="390" stroke="#888" stroke-width="1.8"/><line x1="1130" y1="130" x2="1280" y2="165" stroke="#888" stroke-width="1.8"/><line x1="1130" y1="130" x2="1095" y2="230" stroke="#888" stroke-width="1.8"/><line x1="1280" y1="165" x2="1095" y2="230" stroke="#888" stroke-width="1.8"/><line x1="1280" y1="165" x2="1140" y2="335" stroke="#888" stroke-width="1.8"/><line x1="1280" y1="165" x2="1290" y2="320" stroke="#888" stroke-width="1.8"/><line x1="1095" y1="230" x2="1140" y2="335" stroke="#888" stroke-width="1.8"/><line x1="1140" y1="335" x2="1290" y2="320" stroke="#888" stroke-width="1.8"/><line x1="1140" y1="335" x2="1035" y2="390" stroke="#888" stroke-width="1.8"/><line x1="920" y1="365" x2="1035" y2="390" stroke="#888" stroke-width="1.8"/><line x1="920" y1="365" x2="855" y2="475" stroke="#888" stroke-width="1.8"/><line x1="920" y1="365" x2="1010" y2="500" stroke="#888" stroke-width="1.8"/><line x1="1035" y1="390" x2="1010" y2="500" stroke="#888" stroke-width="1.8"/><line x1="1035" y1="390" x2="1130" y2="490" stroke="#888" stroke-width="1.8"/><line x1="855" y1="475" x2="1010" y2="500" stroke="#888" stroke-width="1.8"/><line x1="1010" y1="500" x2="1130" y2="490" stroke="#888" stroke-width="1.8"/><line x1="1130" y1="490" x2="1140" y2="650" stroke="#bbb" stroke-width="1.8" stroke-dasharray="5,5"/><line x1="1140" y1="650" x2="1285" y2="645" stroke="#888" stroke-width="1.8"/><line x1="1140" y1="650" x2="1160" y2="800" stroke="#888" stroke-width="1.8"/><line x1="1285" y1="645" x2="1160" y2="800" stroke="#888" stroke-width="1.8"/><line x1="1285" y1="645" x2="1285" y2="800" stroke="#888" stroke-width="1.8"/><line x1="1160" y1="800" x2="1285" y2="800" stroke="#888" stroke-width="1.8"/><circle cx="300" cy="460" r="22.6" fill="none" stroke="#111" stroke-width="2.9"/><circle cx="1140" cy="650" r="22.6" fill="none" stroke="#111" stroke-width="2.9"/><circle cx="140" cy="175" r="13.3" fill="#e6550d" stroke="#333" stroke-width="1.3"/><circle cx="255" cy="150" r="13.3" fill="#e6550d" stroke="#333" stroke-width="1.3"/><circle cx="430" cy="110" r="13.3" fill="#e6550d" stroke="#333" stroke-width="1.3"/><circle cx="235" cy="265" r="13.3" fill="#e6550d" stroke="#333" stroke-width="1.3"/><circle cx="330" cy="255" r="13.3" fill="#e6550d" stroke="#333" stroke-width="1.3"/><circle cx="430" cy="235" r="13.3" fill="#e6550d" stroke="#333" stroke-width="1.3"/><circle cx="260" cy="375" r="13.3" fill="#e6550d" stroke="#333" stroke-width="1.3"/><circle cx="375" cy="360" r="13.3" fill="#e6550d" stroke="#333" stroke-width="1.3"/><circle cx="300" cy="460" r="13.3" fill="#e6550d" stroke="#333" stroke-width="1.3"/><circle cx="340" cy="630" r="13.3" fill="#31a354" stroke="#333" stroke-width="1.3"/><circle cx="320" cy="745" r="13.3" fill="#31a354" stroke="#333" stroke-width="1.3"/><circle cx="430" cy="730" r="13.3" fill="#31a354" stroke="#333" stroke-width="1.3"/><circle cx="360" cy="860" r="13.3" fill="#31a354" stroke="#333" stroke-width="1.3"/><circle cx="560" cy="180" r="13.3" fill="#3182bd" stroke="#333" stroke-width="1.3"/><circle cx="700" cy="165" r="13.3" fill="#3182bd" stroke="#333" stroke-width="1.3"/><circle cx="815" cy="250" r="13.3" fill="#3182bd" stroke="#333" stroke-width="1.3"/><circle cx="575" cy="300" r="13.3" fill="#3182bd" stroke="#333" stroke-width="1.3"/><circle cx="690" cy="295" r="13.3" fill="#3182bd" stroke="#333" stroke-width="1.3"/><circle cx="590" cy="400" r="13.3" fill="#3182bd" stroke="#333" stroke-width="1.3"/><circle cx="705" cy="390" r="13.3" fill="#3182bd" stroke="#333" stroke-width="1.3"/><circle cx="630" cy="540" r="13.3" fill="#756bb1" stroke="#333" stroke-width="1.3"/><circle cx="765" cy="510" r="13.3" fill="#756bb1" stroke="#333" stroke-width="1.3"/><circle cx="805" cy="630" r="13.3" fill="#756bb1" stroke="#333" stroke-width="1.3"/><circle cx="695" cy="660" r="13.3" fill="#756bb1" stroke="#333" stroke-width="1.3"/><circle cx="720" cy="800" r="13.3" fill="#756bb1" stroke="#333" stroke-width="1.3"/><circle cx="845" cy="765" r="13.3" fill="#756bb1" stroke="#333" stroke-width="1.3"/><circle cx="905" cy="250" r="13.3" fill="#d6616b" stroke="#333" stroke-width="1.3"/><circle cx="1000" cy="195" r="13.3" fill="#d6616b" stroke="#333" stroke-width="1.3"/><circle cx="1130" cy="130" r="13.3" fill="#d6616b" stroke="#333" stroke-width="1.3"/><circle cx="1280" cy="165" r="13.3" fill="#d6616b" stroke="#333" stroke-width="1.3"/><circle cx="1095" cy="230" r="13.3" fill="#d6616b" stroke="#333" stroke-width="1.3"/><circle cx="1140" cy="335" r="13.3" fill="#d6616b" stroke="#333" stroke-width="1.3"/><circle cx="1290" cy="320" r="13.3" fill="#d6616b" stroke="#333" stroke-width="1.3"/><circle cx="920" cy="365" r="13.3" fill="#d6616b" stroke="#333" stroke-width="1.3"/><circle cx="1035" cy="390" r="13.3" fill="#d6616b" stroke="#333" stroke-width="1.3"/><circle cx="855" cy="475" r="13.3" fill="#d6616b" stroke="#333" stroke-width="1.3"/><circle cx="1010" cy="500" r="13.3" fill="#d6616b" stroke="#333" stroke-width="1.3"/><circle cx="1130" cy="490" r="13.3" fill="#d6616b" stroke="#333" stroke-width="1.3"/><circle cx="1140" cy="650" r="13.3" fill="#e7ba52" stroke="#333" stroke-width="1.3"/><circle cx="1285" cy="645" r="13.3" fill="#e7ba52" stroke="#333" stroke-width="1.3"/><circle cx="1160" cy="800" r="13.3" fill="#e7ba52" stroke="#333" stroke-width="1.3"/><circle cx="1285" cy="800" r="13.3" fill="#e7ba52" stroke="#333" stroke-width="1.3"/></svg>
       </div>
       <figcaption><b>FIG-2b.</b> The same six continents, distilled to a vector and held in
-        their world-map positions: 42 territories, 6 colour-coded countries, 83 adjacency edges.
+        their world-map positions: 42 territories, 6 colour-coded <em>countries</em> (what the map
+        above calls continents), 83 adjacency edges.
         Dashed lines are sea routes; the ringed nodes are <em>chokepoints</em> — Central America,
         the lone North&#8211;South link, and Indonesia, the single gateway into Australia. This is
-        the data we score.</figcaption>
+        the data I score.</figcaption>
       <div class="legend">
         <span><i style="background:var(--c1)"></i>Country 1</span>
         <span><i style="background:var(--c2)"></i>Country 2</span>
@@ -303,9 +339,9 @@
   </figure>
 
   <div class="qs">
-    <h3 class="qs-h">The questions we chased</h3>
+    <h3 class="qs-h">The questions I chased</h3>
     <div class="qgrid">
-      <div class="qcard">Is the classic board really the <b>best</b> for six players — or just the one we all grew up with?</div>
+      <div class="qcard">Is the classic board really the <b>best</b> for six players — or just the one I grew up with?</div>
       <div class="qcard">What actually drives <b>fun</b>: the whole architecture of a board — how many countries, how many ways in and out of each, where the chokepoints sit, how sprawling it is — or does a single lever quietly dominate the rest?</div>
       <div class="qcard">Is there a <b>right number of countries</b> for a six-player table, or does the sweet spot slide as the map grows?</div>
       <div class="qcard">When does a strong country tip into an <b>unbeatable fortress</b> — and can you spot that line before anyone rolls a die?</div>
@@ -317,11 +353,11 @@
 
 <!-- ============================ §2 THE PLAYERS ============================ -->
 <section id="players">
-  <div class="sectionhead"><span class="n">2</span><h2>The players we built</h2></div>
+  <div class="sectionhead"><span class="n">2</span><h2>The players I built</h2></div>
   <p class="narrow">To <em>score</em> a board you have to <em>play</em> it — thousands of
-    times, well. So we built a from-scratch classic-Risk engine and seated it with six
+    times, well. So I built a from-scratch classic-Risk engine and seated it with six
     <strong>expert heuristic AI</strong> players. But six bots blindly trading territory
-    isn't a real table. Real Risk is social. So we taught the AI to behave like people:</p>
+    isn't a real table. Real Risk is social. So I taught the AI to behave like people:</p>
   <div class="chips">
     <span class="chip">open (race the small country)</span>
     <span class="chip">ally / form a truce</span>
@@ -489,15 +525,257 @@
     play</em>, never before placing — so the test is a real six-player table, not a scripted
     one. A truce that <em>never</em> breaks is itself a finding: it stalls the game to the
     round cap.</p>
+
+  <h3 class="qs-h">Meet the openers — six ways to place your armies</h3>
+  <p class="pmeta">Before a shot is fired, each seat <em>opens</em> — claims and stacks its armies in the
+    draft — with one of these styles. The win rates below are <strong>on the chosen board (9c/45t #682232)</strong>,
+    against a fair share of <strong>17%</strong>. Notice how flat they are: the best opener manages just
+    <strong>29%</strong>. On the boards I rejected, that same easy-country rush ran all the way to 57% —
+    here, the <em>flatness</em> is the fairness.</p>
+  <div class="pgrid">
+
+    <div class="pcard">
+      <svg class="av" viewBox="0 0 64 64" role="img" aria-label="The Homesteader, the low-contention opener">
+        <circle cx="32" cy="32" r="30" fill="#2bb1a8"/>
+        <circle cx="32" cy="35" r="19" fill="#f3c9a0"/>
+        <path d="M15,29 Q15,15 32,15 Q49,15 49,29 Q44,22 32,22 Q20,22 15,29 Z" fill="#8a5a36"/>
+        <path d="M21,27 q4,-2 8,0" fill="none" stroke="#8a5a36" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M35,27 q4,-2 8,0" fill="none" stroke="#8a5a36" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="26" cy="33" r="2" fill="#3a2e22"/><circle cx="38" cy="33" r="2" fill="#3a2e22"/>
+        <path d="M25,40 Q32,46 39,40" fill="none" stroke="#a8593f" stroke-width="2.2" stroke-linecap="round"/>
+        <g transform="translate(43,9)"><path d="M0,5 l6,-5 6,5 Z" fill="#c9785a"/><rect x="1.5" y="5" width="9" height="7" fill="#e6b894" stroke="#b88a5f" stroke-width="0.6"/><rect x="4.5" y="8.5" width="3" height="3.5" fill="#8a5a36"/></g>
+      </svg>
+      <div>
+        <div class="nm">The Homesteader</div>
+        <div class="st">low-contention</div>
+        <p>Heads for the country nobody else is fighting over and quietly builds a bonus engine in peace.</p>
+        <span class="wr">29% win</span>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <svg class="av" viewBox="0 0 64 64" role="img" aria-label="The Frontrunner, the small-country opener">
+        <circle cx="32" cy="32" r="30" fill="#31a354"/>
+        <circle cx="32" cy="35" r="19" fill="#f3c9a0"/>
+        <path d="M15,30 Q15,16 32,16 Q49,16 49,30 Q44,23 32,23 Q20,23 15,30 Z" fill="#6b4a2f"/>
+        <path d="M21,17 l0,-8 5,5 6,-7 6,7 5,-5 0,8 Z" fill="#f4c520" stroke="#c79e12" stroke-width="0.8"/>
+        <circle cx="26" cy="33" r="2" fill="#3a2e22"/><circle cx="38" cy="33" r="2" fill="#3a2e22"/>
+        <path d="M22,40 Q32,48 42,40" fill="none" stroke="#a8593f" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="nm">The Frontrunner</div>
+        <div class="st">small-country</div>
+        <p>Races the smallest, most defensible country and stacks its few entry lanes — the strongest real opener.</p>
+        <span class="wr">21% win</span>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <svg class="av" viewBox="0 0 64 64" role="img" aria-label="The Wildcard, the random opener">
+        <circle cx="32" cy="32" r="30" fill="#9aa3ad"/>
+        <circle cx="32" cy="35" r="19" fill="#f3c9a0"/>
+        <path d="M14,28 q3,-10 7,-3 q3,-11 8,-3 q4,-10 8,-2 q4,-9 9,-1 q2,6 -1,11 Q44,23 32,23 Q19,22 14,28 Z" fill="#7e8893"/>
+        <circle cx="26" cy="33" r="3.4" fill="#fff" stroke="#3a2e22" stroke-width="1"/><circle cx="27.4" cy="34.3" r="1.3" fill="#3a2e22"/>
+        <circle cx="38" cy="33" r="3.4" fill="#fff" stroke="#3a2e22" stroke-width="1"/><circle cx="36.6" cy="31.7" r="1.3" fill="#3a2e22"/>
+        <ellipse cx="32" cy="43" rx="2.6" ry="3" fill="#7a3b2c"/>
+        <g transform="translate(43,9) rotate(14)"><rect width="12" height="12" rx="2.6" fill="#fff" stroke="#7e8893" stroke-width="1.1"/><circle cx="3.6" cy="3.6" r="1.1" fill="#444"/><circle cx="8.4" cy="8.4" r="1.1" fill="#444"/><circle cx="8.4" cy="3.6" r="1.1" fill="#444"/></g>
+      </svg>
+      <div>
+        <div class="nm">The Wildcard</div>
+        <div class="st">random</div>
+        <p>Claims and scatters at random — the experimental control everyone else has to beat.</p>
+        <span class="wr">17% win</span>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <svg class="av" viewBox="0 0 64 64" role="img" aria-label="The Spoiler, the blocker opener">
+        <circle cx="32" cy="32" r="30" fill="#3182bd"/>
+        <circle cx="32" cy="35" r="19" fill="#f3c9a0"/>
+        <path d="M15,29 Q15,15 32,15 Q49,15 49,29 Q45,22 38,22 L36,18 Q26,19 15,29 Z" fill="#4a3b2a"/>
+        <path d="M22,31 q3.5,2 7,0" fill="none" stroke="#3a2e22" stroke-width="2" stroke-linecap="round"/>
+        <path d="M35,31 q3.5,2 7,0" fill="none" stroke="#3a2e22" stroke-width="2" stroke-linecap="round"/>
+        <path d="M35,26 q4,-3 8,-1" fill="none" stroke="#4a3b2a" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M24,42 Q31,45 41,39" fill="none" stroke="#a8593f" stroke-width="2.2" stroke-linecap="round"/>
+        <g transform="translate(42,10)"><rect width="13" height="10" rx="1" fill="#d6a06a" stroke="#9a6b3f" stroke-width="0.9"/><line x1="0" y1="5" x2="13" y2="5" stroke="#9a6b3f" stroke-width="0.8"/><line x1="4.3" y1="0" x2="4.3" y2="5" stroke="#9a6b3f" stroke-width="0.8"/><line x1="8.6" y1="5" x2="8.6" y2="10" stroke="#9a6b3f" stroke-width="0.8"/></g>
+      </svg>
+      <div>
+        <div class="nm">The Spoiler</div>
+        <div class="st">blocker</div>
+        <p>Doesn't build — denies. Claims into whatever country a rival is about to complete.</p>
+        <span class="wr">14% win</span>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <svg class="av" viewBox="0 0 64 64" role="img" aria-label="The Zealot, the concentrate opener">
+        <circle cx="32" cy="32" r="30" fill="#e6550d"/>
+        <circle cx="32" cy="35" r="19" fill="#f3c9a0"/>
+        <path d="M15,29 Q15,15 32,15 Q49,15 49,29 Q44,22 32,22 Q20,22 15,29 Z" fill="#3a2c20"/>
+        <path d="M22,28 q4,-1 7,1" fill="none" stroke="#3a2c20" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M35,29 q3,-2 7,-1" fill="none" stroke="#3a2c20" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="26" cy="33" r="2" fill="#3a2e22"/><circle cx="38" cy="33" r="2" fill="#3a2e22"/>
+        <path d="M24,41 Q32,46 40,41" fill="none" stroke="#a8593f" stroke-width="2.2" stroke-linecap="round"/>
+        <g transform="translate(45,8)"><line x1="0" y1="0" x2="0" y2="15" stroke="#7a4a2a" stroke-width="1.6"/><path d="M0,1 l10,3.2 l-10,3.2 Z" fill="#e6550d" stroke="#b3430a" stroke-width="0.6"/></g>
+      </svg>
+      <div>
+        <div class="nm">The Zealot</div>
+        <div class="st">concentrate</div>
+        <p>Pours everything into completing one country — all-in on a single bonus engine.</p>
+        <span class="wr">11% win</span>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <svg class="av" viewBox="0 0 64 64" role="img" aria-label="The Drifter, the spread opener">
+        <circle cx="32" cy="32" r="30" fill="#756bb1"/>
+        <circle cx="32" cy="35" r="19" fill="#f3c9a0"/>
+        <g fill="#cfc7e6"><circle cx="11" cy="18" r="2.2"/><circle cx="53" cy="15" r="1.8"/><circle cx="52" cy="48" r="2.2"/><circle cx="12" cy="46" r="1.8"/></g>
+        <path d="M15,29 Q15,15 32,15 Q49,15 49,29 Q44,22 32,22 Q20,22 15,29 Z" fill="#5a4633"/>
+        <line x1="22" y1="29" x2="29" y2="26" stroke="#5a4633" stroke-width="1.6" stroke-linecap="round"/>
+        <line x1="42" y1="29" x2="35" y2="26" stroke="#5a4633" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="26" cy="33" r="1.9" fill="#3a2e22"/><circle cx="38" cy="33" r="1.9" fill="#3a2e22"/>
+        <path d="M26,44 Q32,40 38,44" fill="none" stroke="#a8593f" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="nm">The Drifter</div>
+        <div class="st">spread</div>
+        <p>Spreads thin across every country it can touch — looks busy, holds nothing. The floor.</p>
+        <span class="wr">8% win</span>
+      </div>
+    </div>
+
+  </div>
+
+  <h3 class="qs-h" style="margin-top:1.7rem">…and six tempers for how they play it</h3>
+  <p class="pmeta">Once the armies are down, every seat runs one of these <em>temperaments</em> — the value model
+    behind each attack, defence, and grab for a country bonus. (Each seat pairs one opening above with one
+    temperament here.) On #682232 no single temper runs away either: the strongest wins ~29% against the
+    same 17% fair share.</p>
+  <div class="pgrid">
+
+    <div class="pcard">
+      <svg class="av" viewBox="0 0 64 64" role="img" aria-label="The Warlord temperament">
+        <circle cx="32" cy="32" r="30" fill="#c0392b"/>
+        <circle cx="32" cy="35" r="19" fill="#f0c19a"/>
+        <path d="M15,28 Q15,14 32,14 Q49,14 49,28 Q44,21 32,21 Q20,21 15,28 Z" fill="#2c2622"/>
+        <line x1="22" y1="28" x2="29" y2="31" stroke="#2c2622" stroke-width="2" stroke-linecap="round"/>
+        <line x1="42" y1="28" x2="35" y2="31" stroke="#2c2622" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="26" cy="35" r="1.9" fill="#3a2e22"/><circle cx="38" cy="35" r="1.9" fill="#3a2e22"/>
+        <path d="M25,43 Q32,40 39,43" fill="none" stroke="#7a2e22" stroke-width="2.2" stroke-linecap="round"/>
+        <g transform="translate(44,7) rotate(20)"><rect x="-1" y="0" width="2.4" height="13" fill="#cdd3da"/><rect x="-2.6" y="11.5" width="5.6" height="2.6" rx="1" fill="#8a6b3f"/></g>
+      </svg>
+      <div>
+        <div class="nm">The Warlord</div>
+        <div class="st">warlord</div>
+        <p>Attacks on the slimmest edge and pushes deep. High aggression, low guard — lives by the sword.</p>
+        <span class="trait">aggressive · low defence</span>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <svg class="av" viewBox="0 0 64 64" role="img" aria-label="The Expander temperament">
+        <circle cx="32" cy="32" r="30" fill="#3182bd"/>
+        <circle cx="32" cy="35" r="19" fill="#f3c9a0"/>
+        <path d="M15,29 Q15,15 32,15 Q49,15 49,29 Q44,22 32,22 Q20,22 15,29 Z" fill="#6b4a2f"/>
+        <path d="M21,27 q4,-2 8,0" fill="none" stroke="#6b4a2f" stroke-width="1.4" stroke-linecap="round"/>
+        <path d="M35,27 q4,-2 8,0" fill="none" stroke="#6b4a2f" stroke-width="1.4" stroke-linecap="round"/>
+        <circle cx="26" cy="33" r="2" fill="#3a2e22"/><circle cx="38" cy="33" r="2" fill="#3a2e22"/>
+        <path d="M23,40 Q32,48 41,40" fill="none" stroke="#a8593f" stroke-width="2.2" stroke-linecap="round"/>
+        <g stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M48,13 l6,-6"/><path d="M54,7 l-4.5,0.4"/><path d="M54,7 l-0.4,4.5"/></g>
+      </svg>
+      <div>
+        <div class="nm">The Expander</div>
+        <div class="st">expander</div>
+        <p>Grabs ground relentlessly — fast, land-hungry, and light on defence.</p>
+        <span class="trait">land-greedy</span>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <svg class="av" viewBox="0 0 64 64" role="img" aria-label="The Opportunist temperament">
+        <circle cx="32" cy="32" r="30" fill="#756bb1"/>
+        <circle cx="32" cy="35" r="19" fill="#f3c9a0"/>
+        <path d="M15,28 Q15,14 32,14 Q49,14 49,28 Q44,21 32,21 Q20,21 15,28 Z" fill="#3a2c20"/>
+        <path d="M18,30 Q26,27 30,30 Q25,35 18,32 Z" fill="#2a2536"/>
+        <path d="M46,30 Q38,27 34,30 Q39,35 46,32 Z" fill="#2a2536"/>
+        <circle cx="24.5" cy="31" r="1.4" fill="#fff"/><circle cx="39.5" cy="31" r="1.4" fill="#fff"/>
+        <path d="M25,42 Q31,45 40,40" fill="none" stroke="#a8593f" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="nm">The Opportunist</div>
+        <div class="st">opportunist</div>
+        <p>Waits to smash a rival's country the turn before they cash the bonus. A born spoiler.</p>
+        <span class="trait">denial-first</span>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <svg class="av" viewBox="0 0 64 64" role="img" aria-label="The All-Rounder temperament">
+        <circle cx="32" cy="32" r="30" fill="#5b7794"/>
+        <circle cx="32" cy="35" r="19" fill="#f3c9a0"/>
+        <path d="M15,29 Q15,15 32,15 Q49,15 49,29 Q44,22 32,22 Q20,22 15,29 Z" fill="#6b5a45"/>
+        <path d="M22,28 q3.5,-1.5 7,0" fill="none" stroke="#6b5a45" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M35,28 q3.5,-1.5 7,0" fill="none" stroke="#6b5a45" stroke-width="1.3" stroke-linecap="round"/>
+        <circle cx="26" cy="33" r="2" fill="#3a2e22"/><circle cx="38" cy="33" r="2" fill="#3a2e22"/>
+        <path d="M26,41 Q32,45 38,41" fill="none" stroke="#a8593f" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <div class="nm">The All-Rounder</div>
+        <div class="st">balanced</div>
+        <p>No obsession and no blind spot — attacks, defends, and completes in equal measure. The control.</p>
+        <span class="trait">balanced</span>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <svg class="av" viewBox="0 0 64 64" role="img" aria-label="The Turtle temperament">
+        <circle cx="32" cy="32" r="30" fill="#31a354"/>
+        <circle cx="32" cy="35" r="19" fill="#f3c9a0"/>
+        <path d="M15,29 Q15,15 32,15 Q49,15 49,29 Q44,22 32,22 Q20,22 15,29 Z" fill="#5a4633"/>
+        <path d="M22,29 q3.5,1.5 7,0" fill="none" stroke="#5a4633" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M35,29 q3.5,1.5 7,0" fill="none" stroke="#5a4633" stroke-width="1.3" stroke-linecap="round"/>
+        <circle cx="26" cy="34" r="1.9" fill="#3a2e22"/><circle cx="38" cy="34" r="1.9" fill="#3a2e22"/>
+        <path d="M26,41 Q32,44 38,41" fill="none" stroke="#a8593f" stroke-width="2" stroke-linecap="round"/>
+        <g transform="translate(41,38)"><path d="M0,6 q6,-9 12,0 q-6,4 -12,0 Z" fill="#3f7d4f" stroke="#2e6b40" stroke-width="0.8"/><path d="M3,3.4 l3,-2 3,2" fill="none" stroke="#2e6b40" stroke-width="0.7"/></g>
+      </svg>
+      <div>
+        <div class="nm">The Turtle</div>
+        <div class="st">turtle</div>
+        <p>Only attacks when it's nearly free and pours every reinforcement into defence. Waits you out.</p>
+        <span class="trait">defensive</span>
+      </div>
+    </div>
+
+    <div class="pcard">
+      <svg class="av" viewBox="0 0 64 64" role="img" aria-label="The Collector temperament">
+        <circle cx="32" cy="32" r="30" fill="#e0a82e"/>
+        <circle cx="32" cy="35" r="19" fill="#f3c9a0"/>
+        <path d="M15,29 Q15,15 32,15 Q49,15 49,29 Q44,22 32,22 Q20,22 15,29 Z" fill="#8a5a36"/>
+        <path d="M21,27 q4,-2 8,1" fill="none" stroke="#8a5a36" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M35,28 q4,-2 8,-1" fill="none" stroke="#8a5a36" stroke-width="1.3" stroke-linecap="round"/>
+        <circle cx="26" cy="33" r="2" fill="#3a2e22"/><circle cx="38" cy="33" r="2" fill="#3a2e22"/>
+        <path d="M24,40 Q32,47 40,40" fill="none" stroke="#a8593f" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M50,7 l1.5,3.2 3.5,0.4 -2.6,2.4 0.7,3.4 -3.1,-1.8 -3.1,1.8 0.7,-3.4 -2.6,-2.4 3.5,-0.4 Z" fill="#f4d23a" stroke="#caa017" stroke-width="0.5"/>
+      </svg>
+      <div>
+        <div class="nm">The Collector</div>
+        <div class="st">country-greedy</div>
+        <p>Single-minded about finishing whole countries for the bonus — pays almost any price to complete one.</p>
+        <span class="trait">bonus-hungry</span>
+      </div>
+    </div>
+
+  </div>
 </section>
 
 <!-- ============================ §3 SIMULATING THE MATRIX ============================ -->
 <section id="matrix">
   <div class="sectionhead"><span class="n">3</span><h2>Simulating the matrix</h2></div>
   <div class="narrow">
-    <p style="margin-top:0">One board, played once, tells you nothing — dice are random. So we
+    <p style="margin-top:0">One board, played once, tells you nothing — dice are random. So I
       played each board <em>hundreds — up to a thousand —</em> times and read the <strong>aggregate</strong>. Then
-      we did that for thousands of boards, across every opening and every diplomacy scenario.</p>
+      I did that for thousands of boards, across every opening and every diplomacy scenario.</p>
     <p>That cross-product is the <strong>permutation matrix</strong>: each generated board
       is replayed against <strong>6 opening strategies</strong> and <strong>6 diplomacy
       scenarios</strong>, and the finalists are each averaged over <strong>1,000</strong> seeded games with bootstrap confidence intervals.</p>
@@ -515,9 +793,9 @@
   <p class="muted narrow" style="font-size:.82rem">It started with an <strong>overnight search</strong> of 1,000 candidates and a <strong>four-run sweep</strong> across scenarios, then a from-scratch <strong>buildable-board re-search</strong> (dozens of parallel passes) whose finalists were each confirmed over <strong>1,000 games</strong> with bootstrap intervals. <em>Captures a lot, stores a little</em> — only each board's aggregates survive; the per-game records are thrown away.</p>
 </section>
 
-<!-- ============================ §4 HOW WE MEASURED ============================ -->
+<!-- ============================ §4 HOW I MEASURED ============================ -->
 <section id="measure">
-  <div class="sectionhead"><span class="n">4</span><h2>How we measured</h2></div>
+  <div class="sectionhead"><span class="n">4</span><h2>How I measured</h2></div>
   <div class="narrow">
     <p style="margin-top:0">Every game produces metrics in three families — <strong>balance</strong>
       (is it fair?), <strong>fun</strong> (is it a good story?), and <strong>structure</strong>
@@ -525,7 +803,7 @@
       permutations can be ranked: <strong>40% balance + 60% fun</strong>. Structure is a fourth
       diagnostic lens — degree, chokepoints, diameter, border ratio — that <em>explains</em> where a
       board lands without being weighted into the score. Because the 40/60 split is a chosen
-      convention, not a law of nature, we always read the components, not just the total.</p>
+      convention, not a law of nature, I always read the components, not just the total.</p>
     <p class="muted" style="font-size:.9rem">Realistic house rules sharpen the
       readout: a <strong>70/70 dominance win</strong> ends a game once a player holds ≥70% of
       territory <em>and</em> troops (you don't grind to the last army), and a <strong>swarm
@@ -583,7 +861,7 @@
     </div>
     <figcaption><b>FIG-5.</b> Where the good boards really live. The buildable winners cluster <strong>small</strong> (8–9 countries, ~40–53 territories) — right by World’s size, not the big-board region the all-war score flattered to ~95 with un-drawable hubs.</figcaption>
   </figure>
-  <div class="findings"><div class="finding"><h4>Fewer &amp; smaller win</h4><p>8&ndash;9 countries on ~40&ndash;53 territories &mdash; right by World&rsquo;s 42. Add more and <strong>fragmentation</strong> bites: too few territories per country and one cheap country decides games.</p></div><div class="finding"><h4>Buildability is the gate</h4><p>Every territory must be <em>drawable</em>: attackable from <strong>&le;5</strong> others, bordering <strong>&le;4</strong> countries. Un-drawable cross-map &ldquo;hubs&rdquo; had inflated the old ~95 scores by ~17 points.</p></div><div class="finding"><h4>Openings, not diplomacy</h4><p>Truces, swarms and betrayal barely move a board (<strong>&plusmn;0&ndash;7</strong>). What breaks the weak ones is smart <em>setup</em> &mdash; so we rank on <strong>opening-robustness</strong>, not the random deal.</p></div><div class="finding"><h4>Score fun, not just fairness</h4><p>A flat &ldquo;fair&rdquo; board can be a dead grind. We score a live <strong>bonus-economy</strong> arc (progression) alongside fairness &mdash; the winner builds <em>and</em> stays contestable.</p></div></div>
+  <div class="findings"><div class="finding"><h4>Fewer &amp; smaller win</h4><p>8&ndash;9 countries on ~40&ndash;53 territories &mdash; right by World&rsquo;s 42. Add more and <strong>fragmentation</strong> bites: too few territories per country and one cheap country decides games.</p></div><div class="finding"><h4>Buildability is the gate</h4><p>Every territory must be <em>drawable</em>: attackable from <strong>&le;5</strong> others, bordering <strong>&le;4</strong> countries. Un-drawable cross-map &ldquo;hubs&rdquo; had inflated the old ~95 scores by ~17 points.</p></div><div class="finding"><h4>Openings, not diplomacy</h4><p>Truces, swarms and betrayal barely move a board (<strong>&plusmn;0&ndash;7</strong>). What breaks the weak ones is smart <em>setup</em> &mdash; so I rank on <strong>opening-robustness</strong>, not the random deal.</p></div><div class="finding"><h4>Score fun, not just fairness</h4><p>A flat &ldquo;fair&rdquo; board can be a dead grind. I score a live <strong>bonus-economy</strong> arc (progression) alongside fairness &mdash; the winner builds <em>and</em> stays contestable.</p></div></div>
 <div class="cols"><div><div class="svgfig"><svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mean composite rises to a peak around 6 to 8 countries then falls as fragmentation sets in.">
           <text x="0" y="18" font-family="system-ui" font-size="14" font-weight="700" fill="#222">Mean composite vs country count</text>
           <!-- axes -->
@@ -649,7 +927,7 @@
             <text x="166" y="235" font-size="12" fill="#555">3%</text>
           </g>
         </svg></div><figcaption><b>FIG-7.</b> The table plays like people: simply racing the most defensible country wins <strong>57%</strong> against a fair share of 17% &mdash; no specialist opening beats it.</figcaption></div></div>
-<h3 class="digh">The nitty-gritty <span>&mdash; expand for the detail behind each finding</span></h3><details class="dig"><summary>The fragmentation trap &amp; the country-count sweet spot</summary><div>The single biggest unfairness driver isn&rsquo;t the fortress country everyone fears &mdash; it&rsquo;s <strong>fragmentation</strong>. Cut too few territories into too many countries (<code>territories &lt; ~5&ndash;6 &times; countries</code>) and one cheap country <em>is</em> a big slice of the map: it decides <strong>21&ndash;33%</strong> of games, they end too fast, and one play-style dominates. The penalty is real and monotonic (r = <strong>&minus;0.47</strong> across 70 boards) &mdash; which is why the buildable winners sit at <strong>8&ndash;9 countries on ~40&ndash;53 territories</strong>, not the big 75&ndash;88-territory boards the all-war score once flattered to ~95.</div></details><details class="dig"><summary>The &ldquo;false-fun&rdquo; trap &mdash; the tuning that mattered most</summary><div>The scariest result was an early one: the score happily crowned the <em>wrong</em> board. A handful of <strong>big, near-equal countries</strong> on lots of territory scored ~95 and looked perfect &mdash; but completing a country took so many conquests that the <strong>bonus economy went dead</strong>: no snowball, no build-up, just a flat grind the metric mistook for &ldquo;fair and contestable.&rdquo; The fix: push the generator <em>away</em> from equal blocks toward traditional-Risk variety (a few sprawling countries, several small defensible ones) and add a <strong>progression</strong> score &mdash; whole countries the winner already held at midgame &mdash; so a real risk/reward arc gets measured. We never rank on the composite alone again.</div></details><details class="dig"><summary>Buildability &mdash; capping attack-degree (&le;5) and bordering countries (&le;4)</summary><div>A board can be a perfectly valid graph and still be <em>un-drawable</em>. Left uncapped, the generator bred territories attackable from <strong>five, six, even seven</strong> directions &mdash; cross-map &ldquo;hubs&rdquo; you can&rsquo;t lay out as a real board, and which <em>inflated</em> the score by letting nobody fortress up. Two hard caps fix it: a territory is attackable from at most <strong>5 others</strong> (real Risk&rsquo;s busiest crossroads top out at 6) and borders at most <strong>4 distinct countries</strong>. Adding them <strong>voided the old ~95 winners</strong> (&minus;~17 composite) and forced a fresh search over ~1,400 buildable boards.</div></details><details class="dig"><summary>Diplomacy is fine &mdash; <em>openings</em> are the real test</summary><div>We stress-tested the winners properly, and the reassuring half holds: truces, swarms and betrayal barely move a board (emergent diplomacy: <strong>&plusmn;0&ndash;7 points</strong>). The <em>unreassuring</em> half is what the random army deal was hiding &mdash; once the table <strong>claims and stacks strategically at setup</strong>, the all-war ranking falls apart: weak boards drop <strong>&minus;9 to &minus;32</strong> points, and the all-war &ldquo;best&rdquo; board (90) sinks to the realistic <em>worst</em> (58).</div></details><details class="dig"><summary>The economy dial &mdash; fairness vs a rich bonus economy</summary><div>Fairness and a <em>rich bonus economy</em> genuinely trade off. The boards where winning most <em>runs through</em> completing countries are 11&ndash;12-country boards &mdash; but they cost about <strong>10 composite points</strong> of fairness. A real design knob, not a free lunch; the 9-country winner is the sweet spot that keeps a live economy without paying the full fragmentation tax.</div></details><details class="dig"><summary>A bonus you can derive &mdash; the perfect-bonus formula</summary><div>
+<h3 class="digh">The nitty-gritty <span>&mdash; expand for the detail behind each finding</span></h3><details class="dig"><summary>The fragmentation trap &amp; the country-count sweet spot</summary><div>The single biggest unfairness driver isn&rsquo;t the fortress country everyone fears &mdash; it&rsquo;s <strong>fragmentation</strong>. Cut too few territories into too many countries (<code>territories &lt; ~5&ndash;6 &times; countries</code>) and one cheap country <em>is</em> a big slice of the map: it decides <strong>21&ndash;33%</strong> of games, they end too fast, and one play-style dominates. The penalty is real and monotonic (r = <strong>&minus;0.47</strong> across 70 boards) &mdash; which is why the buildable winners sit at <strong>8&ndash;9 countries on ~40&ndash;53 territories</strong>, not the big 75&ndash;88-territory boards the all-war score once flattered to ~95.</div></details><details class="dig"><summary>The &ldquo;false-fun&rdquo; trap &mdash; the tuning that mattered most</summary><div>The scariest result was an early one: the score happily crowned the <em>wrong</em> board. A handful of <strong>big, near-equal countries</strong> on lots of territory scored ~95 and looked perfect &mdash; but completing a country took so many conquests that the <strong>bonus economy went dead</strong>: no snowball, no build-up, just a flat grind the metric mistook for &ldquo;fair and contestable.&rdquo; The fix: push the generator <em>away</em> from equal blocks toward traditional-Risk variety (a few sprawling countries, several small defensible ones) and add a <strong>progression</strong> score &mdash; whole countries the winner already held at midgame &mdash; so a real risk/reward arc gets measured. I never rank on the composite alone again.</div></details><details class="dig"><summary>Buildability &mdash; capping attack-degree (&le;5) and bordering countries (&le;4)</summary><div>A board can be a perfectly valid graph and still be <em>un-drawable</em>. Left uncapped, the generator bred territories attackable from <strong>five, six, even seven</strong> directions &mdash; cross-map &ldquo;hubs&rdquo; you can&rsquo;t lay out as a real board, and which <em>inflated</em> the score by letting nobody fortress up. Two hard caps fix it: a territory is attackable from at most <strong>5 others</strong> (real Risk&rsquo;s busiest crossroads top out at 6) and borders at most <strong>4 distinct countries</strong>. Adding them <strong>voided the old ~95 winners</strong> (&minus;~17 composite) and forced a fresh search over ~1,400 buildable boards.</div></details><details class="dig"><summary>Diplomacy is fine &mdash; <em>openings</em> are the real test</summary><div>I stress-tested the winners properly, and the reassuring half holds: truces, swarms and betrayal barely move a board (emergent diplomacy: <strong>&plusmn;0&ndash;7 points</strong>). The <em>unreassuring</em> half is what the random army deal was hiding &mdash; once the table <strong>claims and stacks strategically at setup</strong>, the all-war ranking falls apart: weak boards drop <strong>&minus;9 to &minus;32</strong> points, and the all-war &ldquo;best&rdquo; board (90) sinks to the realistic <em>worst</em> (58).</div></details><details class="dig"><summary>The economy dial &mdash; fairness vs a rich bonus economy</summary><div>Fairness and a <em>rich bonus economy</em> genuinely trade off. The boards where winning most <em>runs through</em> completing countries are 11&ndash;12-country boards &mdash; but they cost about <strong>10 composite points</strong> of fairness. A real design knob, not a free lunch; the 9-country winner is the sweet spot that keeps a live economy without paying the full fragmentation tax.</div></details><details class="dig"><summary>A bonus you can derive &mdash; the perfect-bonus formula</summary><div>
     <p class="eb">A bonus you can derive</p>
     <h3>The perfect-bonus formula</h3>
     <p class="lead2">Classic Risk's continent bonuses — 2, 2, 3, 5, 5, 7 — read like folklore. They
@@ -686,15 +964,15 @@
       one bothers completing it. That single ratio — not the headline bonus — is what the sweep tunes for
       fairness, and it's exactly the <code>&lambda;</code> knob the lab turns.</p>
   </div></details>
-<p class="muted narrow" style="margin-top:1.5rem;font-size:.9rem">The corrected, buildable search produced the <strong>10 best 8-country and 10 best 9-country maps</strong> &mdash; browse them as <a href="viable-maps.html">physical boards</a> or the <a href="findings.html">full 20-map analysis</a>. The winner, <strong>9c/45t #682232</strong>, is the board laid out across this page. Full trail: <code>research-paper.md</code> Iterations&nbsp;12&ndash;15.</p>
+<p class="muted narrow" style="margin-top:1.5rem;font-size:.9rem">The corrected, buildable search produced the <strong>10 best 8-country and 10 best 9-country maps</strong> &mdash; browse them as <a href="viable-maps.html">physical boards</a> or the <a href="findings.html">full 20-map analysis</a>. The winner, <strong>9c/45t #682232</strong>, is the board laid out across this page.</p>
 </section>
 
 <!-- ============================ §6 FROM MATRIX TO MAP ============================ -->
 <section id="map">
   <div class="sectionhead"><span class="n">6</span><h2>From matrix to map</h2></div>
   <figure style="margin:.4rem 0 .2rem">
-    <img src="viable-png/nodemap.png" alt="Abstract node map of the chosen board: 45 territories as nodes coloured by their 9 countries, solid edges intra-country, dashed lines cross-country borders, ringed nodes are chokepoints." style="max-width:420px;margin:0 auto">
-    <figcaption><b>FIG-8a.</b> <strong>The final matrix we arrived at</strong> — the abstract graph
+    <img src="viable-png/nodemap.png" alt="Abstract node map of the chosen board: 45 territories as nodes coloured by their 9 countries, solid edges intra-country, dashed lines cross-country borders, ringed nodes are chokepoints." style="max-width:700px;margin:0 auto">
+    <figcaption><b>FIG-8a.</b> <strong>The final matrix I arrived at</strong> — the abstract graph
       of the chosen board (<strong>9c/45t #682232</strong>): 45 territories = nodes, colour =
       the 9 countries, solid = intra-country adjacency, dashed = cross-country borders, ringed =
       chokepoints. Balance is decided at this layer; everything below is a way to draw it.</figcaption>
@@ -708,7 +986,7 @@
       <img src="viable-png/fig6-perm5.png" alt="Layout permutation 5 of the chosen board.">
       <img src="viable-png/fig6-perm6.png" alt="Layout permutation 6 of the chosen board.">
     </div>
-    <figcaption><b>FIG-8b.</b> From that matrix we mocked up various <strong>physical
+    <figcaption><b>FIG-8b.</b> From that matrix I mocked up various <strong>physical
       representations</strong> of it — accounting for natural barriers like lakes, mountains, and
       rivers, plus sea routes to islands (composite <strong>87.0</strong>, beats World Risk;
       buildable — every territory attackable from ≤5 others and bordering ≤4 countries).
@@ -817,19 +1095,19 @@
     <div>
       <div class="eyebrow">Deeper research →</div>
       <h2 style="margin:.1rem 0 .3rem">Viable starter maps that beat World Risk</h2>
-      <p class="muted" style="margin:0">We rebuilt the simulator to rank boards on whether they
+      <p class="muted" style="margin:0">I rebuilt the simulator to rank boards on whether they
         survive <em>strategic openings</em> (not the random deal), then capped each territory's
         <strong>attack-degree (≤5)</strong> and <strong>bordering countries (≤4)</strong> so every
         board is actually drawable — voiding the inflated earlier winners and forcing a fresh search
-        over 1,370 boards. The result: <strong>10 viable starter maps</strong> shown as physical
-        boards (layout permutations + PNGs), each beating classic World Risk.</p>
+        over 1,370 boards. The result: <strong>20 viable starter maps</strong> (the 10 best
+        8-country and 10 best 9-country boards) shown as physical boards (layout permutations +
+        PNGs), each beating classic World Risk.</p>
     </div>
     <div class="deeperStat"><b>87.0</b><span>best composite (a 9c map)<br>buildable · World 76.2</span>
       <span class="go">See the viable maps →</span></div>
   </a>
   <p class="muted" style="font-size:.85rem;margin:.6rem 0 0">Also: the full
-    <a href="findings.html">20-map analysis</a> (Wilson CIs, leader-penalty curves); the full
-    journey is logged in <code>research-paper.md</code> (Iterations 12–15).</p>
+    <a href="findings.html">20-map analysis</a> (Wilson CIs, leader-penalty curves).</p>
 </section>
 
 </div><!-- /wrap -->
@@ -847,7 +1125,7 @@
       <li><strong>No territory cards.</strong> Escalating card sets change late-game tempo and
         could shift the snowball and length numbers.</li>
       <li><strong>The 40/60 weights are a chosen convention</strong>, not derived. A board's rank
-        can move if we reweight — always read the components, not just the total.</li>
+        can move if I reweight — always read the components, not just the total.</li>
     </ul>
   </div>
   <p class="muted" style="font-size:.8rem;padding-bottom:1.6rem">Risk Lab · In Search of the
