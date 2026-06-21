@@ -4,11 +4,14 @@
 <title>In Search of the Perfect 6-Player Risk Board</title>
 <!--
   Self-contained showcase for risk-lab (research-paper.md, Appendix A).
-  Inline CSS + inline SVG; the two PNGs (FIG-1, FIG-6) are co-located real
-  assets copied from references/ so the site/-only Pages subtree carries them.
-  The remaining figures (FIG-3/4/5/8/11/12) are inline-SVG mock-ups built from
+  Inline CSS + inline SVG; the board PNGs (FIG-1 hero, FIG-8a node map + FIG-8b permutations)
+  are co-located real assets copied from references/ so the site/-only Pages subtree carries them.
+  The remaining figures (FIG-2b/3/4/5/6/7/9/10) are inline-SVG mock-ups built from
   the iteration log — schematic, but grounded in the real method and numbers;
   swap in finished art later by replacing the matching .svgfig block.
+  Figure order: §1 FIG-1 (hero board) · FIG-2a/2b (world map + node-link) · §2 FIG-3/4 (AI turn,
+  diplomacy) · §5 FIG-5 (search space) · FIG-6/7 (country count, openings) · §6 FIG-8a/8b
+  (node map + permutations) · FIG-9 (pipeline) · FIG-10 (editor end state).
 -->
 <style>
  :root{
@@ -18,7 +21,7 @@
  *{box-sizing:border-box}
  body{font:15px/1.6 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);
    margin:0;background:#fff}
- .wrap{max-width:1040px;margin:0 auto;padding:0 1.4rem}
+ .wrap{max-width:860px;margin:0 auto;padding:0 1.3rem}
  a{color:var(--accent)}
  h1,h2,h3{line-height:1.18;margin:0}
  h2{font-size:1.45rem;margin:0 0 .35rem}
@@ -32,14 +35,27 @@
    border-radius:8px;padding:.7rem .95rem;margin:1rem 0;font-size:.92rem}
  .update b.tag{display:inline-block;text-transform:uppercase;letter-spacing:.08em;
    font-size:.68rem;color:#9a7b14;margin-right:.5rem}
+ .deeper{display:flex;gap:1.5rem;align-items:center;justify-content:space-between;
+   text-decoration:none;color:inherit;border:1px solid var(--line);border-radius:14px;
+   padding:1.3rem 1.6rem;background:linear-gradient(110deg,#f6faff,#eef5fd);
+   transition:box-shadow .15s,transform .15s}
+ .deeper:hover{box-shadow:0 6px 22px rgba(49,130,189,.16);transform:translateY(-2px)}
+ .deeper h2{border:0;padding:0}
+ .deeperStat{text-align:center;flex:0 0 auto;border-left:1px solid #dce6f2;padding-left:1.4rem}
+ .deeperStat b{display:block;font-size:2.4rem;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+ .deeperStat span{display:block;font-size:.74rem;color:var(--muted);margin-top:.3rem}
+ .deeperStat .go{margin-top:.6rem;font-size:.82rem;font-weight:700;color:var(--accent)}
+ @media(max-width:680px){.deeper{flex-direction:column;align-items:flex-start}
+   .deeperStat{border-left:0;border-top:1px solid #dce6f2;padding-left:0;padding-top:1rem;text-align:left}}
 
  /* hero */
  .hero{background:linear-gradient(180deg,#f6faff,#fff);border-bottom:1px solid var(--line)}
  .hero .wrap{padding-top:2.2rem;padding-bottom:1.6rem}
  .hero h1{font-size:2.5rem;letter-spacing:-.01em}
- .hero .thesis{font-size:1.12rem;max-width:60ch;color:#333;margin-top:.6rem}
- .heroGrid{display:grid;grid-template-columns:1.15fr 1fr;gap:1.6rem;align-items:center;margin-top:1.2rem}
- @media(max-width:760px){.heroGrid{grid-template-columns:1fr}}
+ .hero .thesis{font-size:1.12rem;color:#333;margin-top:.6rem}
+ .byline{margin:.9rem 0 0;font-size:.85rem;color:var(--muted)}
+ .byline b{color:#444;font-weight:600}
+ .byline .sep{margin:0 .5rem;color:#cbd3da}
 
  /* stat strip */
  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1.2rem 0 .2rem}
@@ -47,6 +63,7 @@
  .stat b{display:block;font-size:1.95rem;line-height:1.05;color:var(--accent);
    font-variant-numeric:tabular-nums}
  .stat span{display:block;font-size:.78rem;color:var(--muted);margin-top:.25rem}
+ @media(max-width:560px){.stats{grid-template-columns:1fr}}
 
  /* sections */
  section{padding:1.7rem 0;border-top:1px solid var(--line)}
@@ -55,7 +72,7 @@
    border-radius:999px;padding:.12rem .6rem}
  .cols{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
  @media(max-width:760px){.cols{grid-template-columns:1fr}}
- .narrow{max-width:66ch}
+ .narrow{max-width:none}
 
  /* figure boxes */
  figure{margin:1rem 0}
@@ -102,15 +119,90 @@
  .honesty li{margin:.2rem 0;font-size:.86rem}
  code{font:.84em ui-monospace,Menlo,Consolas,monospace;background:#eef2f6;border-radius:4px;padding:.05rem .35rem}
 
+ /* questions-we-chased grid */
+ .qs{margin:1.7rem 0 .2rem}
+ .qs-h{font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);
+   font-weight:700;margin:0 0 .8rem;display:flex;align-items:center;gap:.6rem}
+ .qs-h::after{content:"";flex:1;height:1px;background:var(--line)}
+ .qgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:.8rem}
+ .qcard{position:relative;border:1px solid var(--line);border-left:3px solid #cfe0f0;border-radius:10px;
+   background:#fff;padding:.8rem 1rem .8rem 2.5rem;font-size:.92rem;color:#3a3a3a;line-height:1.5}
+ .qcard::before{content:"?";position:absolute;left:.85rem;top:.78rem;width:1.3rem;height:1.3rem;
+   border-radius:50%;background:#eef4fb;color:var(--accent);font-weight:800;font-size:.85rem;
+   display:flex;align-items:center;justify-content:center}
+ .qcard b{color:#111;font-weight:600}
+
+ /* formula spotlight */
+ .spot{background:linear-gradient(140deg,#16263a,#22405d);color:#dce7f1;border-radius:14px;
+   padding:1.5rem 1.7rem;margin:1.5rem 0}
+ .spot .eb{font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;font-weight:700;
+   color:#7fb4e0;margin:0 0 .25rem}
+ .spot h3{color:#fff;font-size:1.4rem;margin:0 0 .9rem;letter-spacing:-.01em}
+ .spot .lead2{color:#bccfe0;font-size:.97rem;margin:0 0 1.1rem}
+ .eqn{font:600 clamp(1.1rem,3.4vw,1.65rem)/1.4 ui-monospace,Menlo,Consolas,monospace;
+   text-align:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.13);
+   border-radius:10px;padding:1.05rem .8rem;margin:0 0 1.15rem}
+ .eqn .out{color:#fff}.eqn .size{color:#7ee0a0}.eqn .bord{color:#f3ad6b}
+ .eqn .op{color:#8fa6bd}.eqn .num{color:#e7c976}
+ .spotgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:1.4rem;align-items:start}
+ @media(max-width:680px){.spotgrid{grid-template-columns:1fr}}
+ .terms{margin:0;padding:0;list-style:none;font-size:.9rem}
+ .terms li{padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.08);color:#c4d3e1;line-height:1.45}
+ .terms li:last-child{border-bottom:0}
+ .terms .k{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;color:#e7eef5}
+ .terms .k.size{color:#7ee0a0}.terms .k.bord{color:#f3ad6b}.terms .k.num{color:#e7c976}
+ .spot table{font-size:.84rem;color:#cddae6;margin:0}
+ .spot th,.spot td{border-color:rgba(255,255,255,.15);padding:.32rem .55rem}
+ .spot th{background:rgba(255,255,255,.06);color:#eef4fb}
+ .spot td.r,.spot th.r{text-align:right}
+ .spot .match{color:#7ee0a0;font-weight:700}.spot .miss{color:#f3ad6b;font-weight:700}
+ .spot .note{font-size:.78rem;color:#9fb3c8;margin:.55rem 0 0}
+ .spot .kicker{margin:1.1rem 0 0;font-size:.93rem;color:#dce7f1;line-height:1.55}
+ .spot .kicker b{color:#fff}
+ .spot code{background:rgba(255,255,255,.13);color:#eef4fb}
+
+ /* premise callout */
+ .premise{border:1px solid #d9e6f2;background:linear-gradient(180deg,#f4f9ff,#fbfdff);
+   border-left:4px solid var(--accent);border-radius:12px;padding:1.05rem 1.3rem;margin:1.6rem 0 1.1rem}
+ .premise .lbl{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.13em;
+   font-weight:700;color:var(--accent);margin:0 0 .35rem}
+ .premise p{margin:0;font-size:.97rem;color:#33414f;line-height:1.62}
+ .premise strong{color:#16263a}
+
+ /* section index / roadmap */
+ .toc{display:flex;flex-wrap:wrap;align-items:center;gap:.15rem;margin:0 0 1.4rem;
+   padding:.55rem .2rem;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+ .toc a{display:inline-flex;align-items:center;gap:.45rem;text-decoration:none;color:#52606d;
+   font-size:.82rem;padding:.28rem .55rem;border-radius:7px}
+ .toc a:hover{background:#eef4fb;color:var(--accent)}
+ .toc a b{display:inline-flex;width:1.3rem;height:1.3rem;border-radius:50%;background:#eef4fb;
+   color:var(--accent);font-size:.72rem;font-weight:700;align-items:center;justify-content:center}
+ .toc .arr{color:#cbd3da;font-size:.8rem;user-select:none}
+ section[id]{scroll-margin-top:1rem}
+
  @media print{
+   .toc{display:none}
    body{font-size:11px}
    .hero h1{font-size:1.9rem}
    .stat b{font-size:1.5rem}
    section,.hero .wrap{padding-top:.7rem;padding-bottom:.7rem}
-   figure,.ph,.svgfig,.cards,table,.heroGrid{break-inside:avoid;page-break-inside:avoid}
+   figure,.ph,.svgfig,.cards,table,
    a{color:inherit;text-decoration:none}
    .hero{break-after:auto}
  }
+
+ .findings{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem;margin:1.3rem 0}
+ .finding{border:1px solid var(--line);border-radius:10px;padding:.85rem 1rem;background:#fbfcfe}
+ .finding h4{margin:0 0 .25rem;font-size:1rem;color:var(--accent)}
+ .finding p{margin:0;font-size:.9rem;color:#444}
+ .digh{margin:1.9rem 0 .5rem;font-size:1.05rem} .digh span{font-weight:400;color:var(--muted);font-size:.82rem}
+ details.dig{border:1px solid var(--line);border-radius:8px;margin:.5rem 0;background:#fff}
+ details.dig>summary{cursor:pointer;padding:.7rem .95rem;font-weight:700;font-size:.94rem;list-style:none}
+ details.dig>summary::-webkit-details-marker{display:none}
+ details.dig>summary::before{content:"\25B8";color:var(--accent);margin-right:.55rem;display:inline-block;transition:transform .15s}
+ details.dig[open]>summary::before{transform:rotate(90deg)}
+ details.dig>div{padding:0 .95rem 1rem;font-size:.92rem;color:#3a3a3a}
+ @media(max-width:680px){.findings{grid-template-columns:1fr}}
 </style></head>
 <body>
 
@@ -122,30 +214,46 @@
     <em>best</em> board for six players — or just the <em>familiar</em> one? We decided
     to find out the only honest way: by treating a board as a vector we could
     generate, mutate, and play <strong>millions</strong> of times.</p>
+  <p class="byline">By <b>Zach Mailloux</b><span class="sep">·</span><time datetime="2026-06-21">June 21, 2026</time></p>
 
-  <div class="heroGrid">
-    <figure style="margin:0">
-      <img src="layout-perm-04-hq.png" alt="The polished generated board: one continent plus an island, routed sea lanes, border-fitted mountains and rivers, country-bonus legend.">
-      <figcaption><b>FIG-1.</b> The payoff — a balance-vetted graph rendered as a real,
-        playable board (generated 86-territory / 11-country layout, <code>perm-04</code>).</figcaption>
-    </figure>
-    <div>
-      <div class="stats">
-        <div class="stat"><b>30,000+</b><span>board permutations explored</span></div>
-        <div class="stat"><b>1.7M</b><span>games simulated</span></div>
-        <div class="stat"><b>95.4</b><span>best all-war composite (classic ≈ 88)</span></div>
-      </div>
-      <p class="muted" style="font-size:.82rem;margin-top:.7rem">Every number on this page
-        traces to a logged experiment in <code>risk-lab</code>. The flash rides on real
-        measurements — never instead of them.</p>
-    </div>
+  <div class="stats">
+    <div class="stat"><b>45,000+</b><span>board permutations explored</span></div>
+    <div class="stat"><b>4M+</b><span>games simulated</span></div>
+    <div class="stat"><b>87.0</b><span>best buildable composite (beats World ≈ 76)</span></div>
   </div>
+  <p class="muted" style="font-size:.82rem;margin:.5rem 0 0">Every number on this page traces to a
+    logged experiment in <code>risk-lab</code>. The flash rides on real measurements — never instead of them.</p>
+  <figure style="margin:1.3rem 0 0">
+    <img src="viable-png/fig6-perm1.png" alt="The chosen board — 9c/45t #682232 — rendered as a physical Risk board: one continent of nine colour-coded countries, an island on a sea route, mountain barriers.">
+    <figcaption><b>FIG-1.</b> The payoff — the chosen board, <strong>9c/45t #682232</strong>
+      (realistic composite 87.0, beats World Risk), rendered as a real, playable board.</figcaption>
+  </figure>
 </div></header>
 
 <div class="wrap">
 
+<aside class="premise">
+  <span class="lbl">The premise — what we're deliberately leaving out</span>
+  <p>Honest caveat first: most of what makes Risk fun is the <strong>people</strong> — the table
+    talk, the shifting alliances, the betrayal you'll never live down. That social theatre matters
+    more than any map, and no metric here pretends to capture it. This study brackets it off on
+    purpose. The question we're chasing is the narrower, measurable one: <strong>strip most of the
+    human element away, and how good can the board itself be?</strong> Everything below is the
+    structural half of the answer — what shape the <em>perfect</em> Risk board takes when judged on
+    its bones alone.</p>
+</aside>
+
+<nav class="toc" aria-label="Sections">
+  <a href="#question"><b>1</b>The question</a><span class="arr">›</span>
+  <a href="#players"><b>2</b>The players</a><span class="arr">›</span>
+  <a href="#matrix"><b>3</b>The matrix</a><span class="arr">›</span>
+  <a href="#measure"><b>4</b>How we measured</a><span class="arr">›</span>
+  <a href="#results"><b>5</b>What it said</a><span class="arr">›</span>
+  <a href="#map"><b>6</b>Into a map</a>
+</nav>
+
 <!-- ============================ §1 THE QUESTION ============================ -->
-<section>
+<section id="question">
   <div class="sectionhead"><span class="n">1</span><h2>The question</h2></div>
   <div class="cols">
     <div>
@@ -193,10 +301,22 @@
         <span><i style="background:var(--c6)"></i>Country 6</span>
       </div>
   </figure>
+
+  <div class="qs">
+    <h3 class="qs-h">The questions we chased</h3>
+    <div class="qgrid">
+      <div class="qcard">Is the classic board really the <b>best</b> for six players — or just the one we all grew up with?</div>
+      <div class="qcard">What actually drives <b>fun</b>: the whole architecture of a board — how many countries, how many ways in and out of each, where the chokepoints sit, how sprawling it is — or does a single lever quietly dominate the rest?</div>
+      <div class="qcard">Is there a <b>right number of countries</b> for a six-player table, or does the sweet spot slide as the map grows?</div>
+      <div class="qcard">When does a strong country tip into an <b>unbeatable fortress</b> — and can you spot that line before anyone rolls a die?</div>
+      <div class="qcard">Does a board that's fair in a vacuum <b>stay fair</b> once real players forge alliances, gang up, and betray?</div>
+      <div class="qcard">Is there a principled <b>formula for a country's bonus</b> — one that reads its size and exposure — instead of hand-tuned magic numbers?</div>
+    </div>
+  </div>
 </section>
 
 <!-- ============================ §2 THE PLAYERS ============================ -->
-<section>
+<section id="players">
   <div class="sectionhead"><span class="n">2</span><h2>The players we built</h2></div>
   <p class="narrow">To <em>score</em> a board you have to <em>play</em> it — thousands of
     times, well. So we built a from-scratch classic-Risk engine and seated it with six
@@ -372,239 +492,99 @@
 </section>
 
 <!-- ============================ §3 SIMULATING THE MATRIX ============================ -->
-<section>
+<section id="matrix">
   <div class="sectionhead"><span class="n">3</span><h2>Simulating the matrix</h2></div>
   <div class="narrow">
     <p style="margin-top:0">One board, played once, tells you nothing — dice are random. So we
-      played each board <em>hundreds</em> of times and read the <strong>aggregate</strong>. Then
+      played each board <em>hundreds — up to a thousand —</em> times and read the <strong>aggregate</strong>. Then
       we did that for thousands of boards, across every opening and every diplomacy scenario.</p>
     <p>That cross-product is the <strong>permutation matrix</strong>: each generated board
       is replayed against <strong>6 opening strategies</strong> and <strong>6 diplomacy
-      scenarios</strong>, and every cell is averaged over hundreds of seeded games.</p>
+      scenarios</strong>, and the finalists are each averaged over <strong>1,000</strong> seeded games with bootstrap confidence intervals.</p>
   </div>
   <div class="cards" style="grid-template-columns:repeat(4,1fr)">
-    <div class="card"><div class="k">30,000+</div>
+    <div class="card"><div class="k">45,000+</div>
       <div class="t">board × opening × scenario permutations</div></div>
-    <div class="card"><div class="k">1.7M</div>
+    <div class="card"><div class="k">4M+</div>
       <div class="t">individual games rolled out</div></div>
-    <div class="card"><div class="k">300</div>
-      <div class="t">games per board in the big sweeps</div></div>
-    <div class="card"><div class="k">~4 hrs</div>
-      <div class="t">overnight + four-run compute</div></div>
+    <div class="card"><div class="k">1,000</div>
+      <div class="t">games per board on the finalists</div></div>
+    <div class="card"><div class="k">dozens</div>
+      <div class="t">of parallel search runs</div></div>
   </div>
-  <p class="muted narrow" style="font-size:.82rem">Two flagship runs anchor the matrix: an
-    <strong>overnight search</strong> of 1,000 candidates between real-world maps, and a
-    <strong>four-run sweep</strong> crossing scenario (all-war vs emergent diplomacy) with
-    ranking (composite / progression / intrigue). <em>Captures a lot, stores a little</em>
-    — only each board's aggregates survive; the per-game records are thrown away.</p>
-  <div class="cols">
-    <div>
-      <figure style="margin:.4rem 0">
-        <div class="svgfig">
-        <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The search space: territories against country count, with sampled boards as dots, a fragmentation trap shaded in the corner where territories drop below six times the country count, and the sweet spot near eight countries on seventy-five to eighty-eight territories.">
-          <text x="30" y="30" font-family="system-ui" font-size="16" font-weight="700" fill="#222">The space we searched</text>
-          <text x="30" y="50" font-family="system-ui" font-size="12" fill="#999">each dot a generated board · colour = composite</text>
-
-          <!-- depth: extra axes (openings × scenarios) as stacked frames -->
-          <rect x="86" y="74" width="490" height="420" rx="6" fill="#fff" stroke="#e8e8e8"/>
-          <rect x="78" y="82" width="490" height="420" rx="6" fill="#fff" stroke="#e0e0e0"/>
-          <text x="585" y="92" text-anchor="end" font-family="system-ui" font-size="10.5" fill="#aab">× 6 openings</text>
-          <text x="585" y="106" text-anchor="end" font-family="system-ui" font-size="10.5" fill="#aab">× 6 diplomacy scenarios</text>
-
-          <!-- main plot -->
-          <rect x="70" y="90" width="490" height="420" rx="6" fill="#fff" stroke="#cdd9e3" stroke-width="1.4"/>
-
-          <!-- fragmentation trap (t < 6c) -->
-          <polygon points="70,90 384,90 70,445" fill="#c0392b" fill-opacity="0.10"/>
-          <line x1="70" y1="445" x2="384" y2="90" stroke="#c0392b" stroke-width="1.6" stroke-dasharray="6,4"/>
-          <text x="150" y="150" font-family="system-ui" font-size="11" font-weight="700" fill="#c0392b">fragmentation trap</text>
-          <text x="150" y="166" font-family="system-ui" font-size="10" fill="#c0651f">territories &lt; 6 × countries</text>
-          <text x="232" y="270" font-family="system-ui" font-size="9.5" fill="#c0392b" transform="rotate(-38 232 270)">guard line: t = 6 × c</text>
-
-          <!-- sweet spot -->
-          <rect x="413" y="323" width="127" height="67" rx="8" fill="#31a354" fill-opacity="0.13" stroke="#31a354" stroke-dasharray="4,3"/>
-          <text x="476" y="312" text-anchor="middle" font-family="system-ui" font-size="11" font-weight="700" fill="#2e8b50">sweet spot</text>
-          <text x="476" y="408" text-anchor="middle" font-family="system-ui" font-size="9.5" fill="#2e8b50">~8c · 75–88t</text>
-
-          <!-- dots: reds (frag) -->
-          <g stroke="#fff" stroke-width="0.8">
-            <circle cx="112" cy="126" r="6" fill="#d6616b"/><circle cx="152" cy="148" r="6" fill="#d6616b"/>
-            <circle cx="124" cy="186" r="6" fill="#d6616b"/><circle cx="176" cy="120" r="6" fill="#d6616b"/>
-            <circle cx="138" cy="232" r="6" fill="#e08a91"/>
-            <!-- greys (meh / mid) -->
-            <circle cx="252" cy="206" r="6" fill="#b9c2cc"/><circle cx="300" cy="252" r="6" fill="#b9c2cc"/>
-            <circle cx="232" cy="300" r="6" fill="#c6dbef"/><circle cx="344" cy="186" r="6" fill="#b9c2cc"/>
-            <circle cx="284" cy="330" r="6" fill="#9ecae1"/><circle cx="362" cy="300" r="6" fill="#9ecae1"/>
-            <circle cx="206" cy="362" r="6" fill="#c6dbef"/>
-            <!-- blues (good) -->
-            <circle cx="432" cy="342" r="6.5" fill="#3182bd"/><circle cx="470" cy="320" r="6.5" fill="#3182bd"/>
-            <circle cx="452" cy="362" r="6.5" fill="#3182bd"/><circle cx="500" cy="312" r="6.5" fill="#2f7bb6"/>
-            <circle cx="490" cy="372" r="6.5" fill="#3182bd"/><circle cx="522" cy="350" r="6.5" fill="#2f7bb6"/>
-            <circle cx="410" cy="300" r="6" fill="#4a91c6"/><circle cx="462" cy="262" r="6" fill="#4a91c6"/>
-            <circle cx="384" cy="362" r="6" fill="#6aaed6"/>
-          </g>
-
-          <!-- anchors -->
-          <g font-family="system-ui" font-size="10.5" font-weight="700">
-            <circle cx="120" cy="490" r="7.5" fill="none" stroke="#111" stroke-width="2"/><circle cx="120" cy="490" r="4" fill="#444"/>
-            <text x="132" y="494" fill="#333">World 42t/6c</text>
-            <circle cx="315" cy="290" r="7.5" fill="none" stroke="#111" stroke-width="2"/><circle cx="315" cy="290" r="4" fill="#444"/>
-            <text x="327" y="294" fill="#333">LotR 65t/9c</text>
-            <circle cx="463" cy="357" r="8.5" fill="none" stroke="#2e8b50" stroke-width="2.4"/><circle cx="463" cy="357" r="4" fill="#2e8b50"/>
-            <text x="386" y="345" fill="#2e8b50">best 74t/8c · 94.9</text>
-          </g>
-
-          <!-- axes -->
-          <line x1="70" y1="510" x2="560" y2="510" stroke="#bbb"/>
-          <line x1="70" y1="90" x2="70" y2="510" stroke="#bbb"/>
-          <g font-family="system-ui" font-size="10.5" fill="#999">
-            <text x="89" y="526">42</text><text x="217" y="526">55</text><text x="315" y="526">65</text><text x="413" y="526">75</text><text x="540" y="526">88</text>
-            <text x="315" y="544" text-anchor="middle" font-size="11.5" fill="#777">territories →</text>
-            <text x="56" y="490" text-anchor="end">6</text><text x="56" y="357" text-anchor="end">8</text><text x="56" y="224" text-anchor="end">10</text><text x="56" y="94" text-anchor="end">12</text>
-            <text x="22" y="300" text-anchor="middle" font-size="11.5" fill="#777" transform="rotate(-90 22 300)">countries →</text>
-          </g>
-        </svg>
-        </div>
-        <figcaption><b>FIG-5.</b> The space we searched, and where the good boards live.</figcaption>
-      </figure>
-    </div>
-    <div>
-      <figure style="margin:.4rem 0">
-        <img src="layout-permutations-contact.png" alt="Contact sheet of eight layout permutations of one generated board, perm-00 through perm-07.">
-        <figcaption><b>FIG-6.</b> Variation made visible — eight layout permutations of a
-          single vetted graph (<code>perm-00…07</code>), the "several mock-ups to pick
-          from" step.</figcaption>
-      </figure>
-    </div>
-  </div>
+  <p class="muted narrow" style="font-size:.82rem">It started with an <strong>overnight search</strong> of 1,000 candidates and a <strong>four-run sweep</strong> across scenarios, then a from-scratch <strong>buildable-board re-search</strong> (dozens of parallel passes) whose finalists were each confirmed over <strong>1,000 games</strong> with bootstrap intervals. <em>Captures a lot, stores a little</em> — only each board's aggregates survive; the per-game records are thrown away.</p>
 </section>
 
 <!-- ============================ §4 HOW WE MEASURED ============================ -->
-<section>
+<section id="measure">
   <div class="sectionhead"><span class="n">4</span><h2>How we measured</h2></div>
-  <div class="cols">
-    <div>
-      <p style="margin-top:0">Every game produces metrics in three families — <strong>balance</strong>
-        (is it fair?), <strong>fun</strong> (is it a good story?), and <strong>structure</strong>
-        (the board's shape). One <strong>composite score</strong> rolls them into a 0–100 number so
-        permutations can be ranked: <strong>40% balance + 60% fun</strong>.</p>
-      <div class="svgfig">
-        <!-- FIG-7: composite breakdown, hand-built from the baseline 40/60 split -->
-        <svg viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Composite score is 40 percent balance and 60 percent fun, broken into sub-metrics.">
-          <text x="0" y="22" font="700 16px system-ui" font-family="system-ui" font-size="16" font-weight="700" fill="#222">Composite = 40% balance + 60% fun</text>
-          <!-- balance bar -->
-          <text x="0" y="62" font-family="system-ui" font-size="13" fill="#555">Balance · 40%</text>
-          <rect x="0" y="72" width="240" height="30" rx="4" fill="#3182bd"/>
-          <text x="10" y="92" font-family="system-ui" font-size="12.5" fill="#fff">seat fairness · persona fairness</text>
-          <!-- fun bar -->
-          <text x="0" y="132" font-family="system-ui" font-size="13" fill="#555">Fun · 60%</text>
-          <rect x="0" y="142" width="360" height="30" rx="4" fill="#e6843c"/>
-          <text x="10" y="162" font-family="system-ui" font-size="12.5" fill="#fff">length · decisiveness · snowball vs comeback · lead changes</text>
-          <!-- scale -->
-          <line x1="0" y1="190" x2="600" y2="190" stroke="#ccc"/>
-          <text x="0" y="208" font-family="system-ui" font-size="11" fill="#999">0%</text>
-          <text x="288" y="208" font-family="system-ui" font-size="11" fill="#999">50%</text>
-          <text x="578" y="208" font-family="system-ui" font-size="11" fill="#999">100%</text>
-        </svg>
-      </div>
-      <figcaption><b>FIG-7.</b> The weighting is a <em>chosen convention</em>, not a law of
-        nature — so we always read the components, not just the total.</figcaption>
-      <p class="muted" style="font-size:.84rem;margin-top:1rem">Realistic house rules sharpen the
-        readout: a <strong>70/70 dominance win</strong> ends a game once a player holds ≥70% of
-        territory <em>and</em> troops (you don't grind to the last army), and a <strong>swarm
-        rule</strong> breaks a runaway's alliances the moment they pass half the board. New panels
-        report <em>how</em> games are won — by dominance, elimination, or the round cap.</p>
-    </div>
-    <div>
-      <figure style="margin:0 0 .4rem">
-        <div class="svgfig">
-        <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The three metric families every game reports: balance (forty percent of the composite), fun (sixty percent), and structure (descriptive shape), each with its sub-metrics.">
-          <text x="30" y="32" font-family="system-ui" font-size="16" font-weight="700" fill="#222">What every game reports</text>
-
-          <!-- donut sectors -->
-          <!-- Balance: -90 to 30 -->
-          <path d="M300,140 A160,160 0 0,1 438.6,380 L373.6,342.5 A85,85 0 0,0 300,215 Z" fill="#3182bd"/>
-          <!-- Fun: 30 to 150 -->
-          <path d="M438.6,380 A160,160 0 0,1 161.4,380 L226.4,342.5 A85,85 0 0,0 373.6,342.5 Z" fill="#e6843c"/>
-          <!-- Structure: 150 to 270 -->
-          <path d="M161.4,380 A160,160 0 0,1 300,140 L300,215 A85,85 0 0,0 226.4,342.5 Z" fill="#756bb1"/>
-
-          <!-- centre -->
-          <circle cx="300" cy="300" r="78" fill="#fff" stroke="#e3e3e3"/>
-          <text x="300" y="290" text-anchor="middle" font-family="system-ui" font-size="14" font-weight="700" fill="#234">Composite</text>
-          <text x="300" y="316" text-anchor="middle" font-family="system-ui" font-size="22" font-weight="700" fill="#3182bd" font-variant-numeric="tabular-nums">0–100</text>
-
-          <!-- sector labels + weight badges -->
-          <g font-family="system-ui">
-            <text x="392" y="232" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Balance</text>
-            <text x="392" y="252" text-anchor="middle" font-size="12" font-weight="700" fill="#dceaf6">40%</text>
-            <text x="300" y="420" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Fun</text>
-            <text x="300" y="440" text-anchor="middle" font-size="12" font-weight="700" fill="#fbe7d6">60%</text>
-            <text x="208" y="232" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Structure</text>
-            <text x="208" y="252" text-anchor="middle" font-size="11" font-weight="700" fill="#e7e3f3">shape</text>
-          </g>
-
-          <!-- sub-metric captions -->
-          <g font-family="system-ui" font-size="11.5">
-            <!-- balance (top-right) -->
-            <text x="468" y="120" fill="#3182bd" font-weight="700">Balance — is it fair?</text>
-            <text x="468" y="138" fill="#666">seat fairness</text>
-            <text x="468" y="154" fill="#666">persona fairness</text>
-            <!-- structure (top-left) -->
-            <text x="30" y="120" fill="#756bb1" font-weight="700">Structure — its shape</text>
-            <text x="30" y="138" fill="#666">degree · chokepoints</text>
-            <text x="30" y="154" fill="#666">diameter · border ratio</text>
-            <!-- fun (bottom) -->
-            <text x="300" y="512" text-anchor="middle" fill="#c0651f" font-weight="700">Fun — is it a good story?</text>
-            <text x="300" y="530" text-anchor="middle" fill="#666">length · decisiveness · snowball</text>
-            <text x="300" y="546" text-anchor="middle" fill="#666">comeback · lead changes</text>
-          </g>
-        </svg>
-        </div>
-        <figcaption><b>FIG-8.</b> What every game reports.</figcaption>
-      </figure>
-    </div>
+  <div class="narrow">
+    <p style="margin-top:0">Every game produces metrics in three families — <strong>balance</strong>
+      (is it fair?), <strong>fun</strong> (is it a good story?), and <strong>structure</strong>
+      (the board's shape). One <strong>composite score</strong> rolls them into a 0–100 number so
+      permutations can be ranked: <strong>40% balance + 60% fun</strong>. Structure is a fourth
+      diagnostic lens — degree, chokepoints, diameter, border ratio — that <em>explains</em> where a
+      board lands without being weighted into the score. Because the 40/60 split is a chosen
+      convention, not a law of nature, we always read the components, not just the total.</p>
+    <p class="muted" style="font-size:.9rem">Realistic house rules sharpen the
+      readout: a <strong>70/70 dominance win</strong> ends a game once a player holds ≥70% of
+      territory <em>and</em> troops (you don't grind to the last army), and a <strong>swarm
+      rule</strong> breaks a runaway's alliances the moment they pass half the board. New panels
+      report <em>how</em> games are won — by dominance, elimination, or the round cap.</p>
   </div>
 </section>
 
 <!-- ============================ §5 WHAT THE MATRIX SAID ============================ -->
-<section>
+<section id="results">
   <div class="sectionhead"><span class="n">5</span><h2>What the matrix said</h2></div>
-  <div class="cols">
-    <div>
-      <h3>The fragmentation trap</h3>
-      <p>The single biggest unfairness driver isn't the fortress country everyone fears —
-        it's <strong>fragmentation</strong>. When you cut too few territories into too many
-        countries (<code>territories &lt; ~6 × countries</code>), one cheap country
-        <em>is</em> a big slice of the map: it decides <strong>21–33%</strong> of games, games
-        end too fast, and one play-style dominates. The worst region is <strong>~42t / 9c</strong>.
-        LotR is fair <em>despite</em> 9 countries — because it spreads them over 65 territories.</p>
-
-      <h3>The recipe</h3>
-      <p>For a clean, balanced six-player board: <strong>~8 countries on ~75–88
-        territories</strong>, keeping <strong>territories ≥ ~6 × countries</strong>. Under the
-        <em>all-war</em> score the best generated board scored <strong>94.9</strong>; the
-        overnight ceiling was <strong>95.4</strong> — both comfortably past the classic's ≈ 88.
-        <em>(But see the update below: the all-war number flatters a board.)</em></p>
-
-      <h3>The economy dial</h3>
-      <p>Fairness and a <em>rich bonus economy</em> genuinely trade off. The boards where
-        winning <em>runs through</em> completing countries are 11–12-country boards — but they
-        cost about <strong>10 composite points</strong>. A real design knob, not a free lunch.</p>
-
-      <h3>Diplomacy is fine — <em>openings</em> are the real test</h3>
-      <p>We finally stress-tested the winners properly, and the reassuring half holds:
-        switching on truces, swarms, and betrayal barely moves a board (emergent diplomacy:
-        <strong>±0–7 points</strong>). The <em>unreassuring</em> half is what the random army
-        deal was hiding — once the table <strong>claims and stacks strategically at setup</strong>,
-        the all-war ranking <strong>falls apart</strong>: weak boards drop <strong>−9 to −32</strong>
-        points, and the all-war "best" board (90) sinks to the realistic <em>worst</em> (58).
-        Robustness was never about diplomacy; it's about surviving smart <strong>openings</strong>.</p>
+  <figure style="margin:.4rem 0 1rem">
+    <div class="svgfig">
+    <svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Search space of territories versus countries. The buildable winning boards cluster small, 8 to 9 countries and roughly 40 to 53 territories, near World Risk's size; the big-board region that scored about 95 was an all-war mirage inflated by un-buildable hubs.">
+      <text x="30" y="28" font-family="system-ui" font-size="17" font-weight="700" fill="#222">Where the good boards really live</text>
+      <text x="30" y="50" font-family="system-ui" font-size="12.5" fill="#777">each dot a board · the buildable winners are <tspan font-weight="700" fill="#2e7d46">small</tspan> (8–9 countries, ~40–53 territories)</text>
+      <line x1="60" y1="520" x2="560" y2="520" stroke="#ccc"/>
+      <line x1="60" y1="80" x2="60" y2="520" stroke="#ccc"/>
+      <g font-family="system-ui" font-size="10.5" fill="#999">
+        <text x="100" y="538" text-anchor="middle">42</text><text x="210" y="538" text-anchor="middle">55</text>
+        <text x="330" y="538" text-anchor="middle">65</text><text x="420" y="538" text-anchor="middle">74</text>
+        <text x="560" y="538" text-anchor="middle">88</text>
+        <text x="48" y="524" text-anchor="end">6</text><text x="48" y="377" text-anchor="end">8</text>
+        <text x="48" y="304" text-anchor="end">9</text><text x="48" y="231" text-anchor="end">10</text><text x="48" y="84" text-anchor="end">12</text>
+      </g>
+      <text x="310" y="562" text-anchor="middle" font-family="system-ui" font-size="11.5" fill="#777">territories →</text>
+      <text x="22" y="300" text-anchor="middle" font-family="system-ui" font-size="11.5" fill="#777" transform="rotate(-90 22 300)">countries →</text>
+      <polygon points="60,80 300,80 80,373 60,373" fill="#f7e4e4" opacity="0.55"/>
+      <text x="92" y="150" font-family="system-ui" font-size="11" font-weight="700" fill="#c0504a">fragmentation</text>
+      <text x="92" y="166" font-family="system-ui" font-size="10.5" fill="#c0726c">too few territories / country</text>
+      <rect x="420" y="329" width="140" height="88" rx="6" fill="#f0f0f0" stroke="#bbb" stroke-dasharray="5 3"/>
+      <text x="490" y="356" text-anchor="middle" font-family="system-ui" font-size="11.5" font-weight="700" fill="#999" text-decoration="line-through">all-war mirage</text>
+      <text x="490" y="372" text-anchor="middle" font-family="system-ui" font-size="10" fill="#aaa">scored ~95, but un-buildable</text>
+      <text x="490" y="386" text-anchor="middle" font-family="system-ui" font-size="10" fill="#aaa">(cross-map hubs)</text>
+      <rect x="80" y="266" width="146" height="128" rx="7" fill="#e9f5ec" stroke="#4a9a63" stroke-width="1.4"/>
+      <text x="153" y="254" text-anchor="middle" font-family="system-ui" font-size="12.5" font-weight="700" fill="#2e7d46">buildable winners</text>
+      <text x="153" y="412" text-anchor="middle" font-family="system-ui" font-size="10.5" fill="#3f8f57">8–9c · ~40–53t · ≤ 87</text>
+      <g fill="#b9c6d4">
+        <circle cx="440" cy="352" r="6"/><circle cx="472" cy="338" r="6"/><circle cx="505" cy="360" r="6"/>
+        <circle cx="535" cy="344" r="6"/><circle cx="430" cy="386" r="6"/><circle cx="548" cy="372" r="6"/>
+        <circle cx="362" cy="332" r="6"/><circle cx="300" cy="362" r="6"/>
+      </g>
+      <g fill="#3f9d5e">
+        <circle cx="98" cy="302" r="6"/><circle cx="118" cy="342" r="6"/><circle cx="152" cy="288" r="6"/>
+        <circle cx="178" cy="322" r="6"/><circle cx="202" cy="302" r="6"/><circle cx="108" cy="372" r="6"/>
+        <circle cx="172" cy="376" r="6"/><circle cx="200" cy="352" r="6"/>
+      </g>
+      <circle cx="100" cy="515" r="7" fill="#fff" stroke="#222" stroke-width="2.4"/><circle cx="100" cy="515" r="2.5" fill="#222"/>
+      <text x="114" y="519" font-family="system-ui" font-size="11.5" font-weight="700" fill="#234">World 42t/6c</text>
+      <circle cx="330" cy="300" r="7" fill="#fff" stroke="#222" stroke-width="2.4"/><circle cx="330" cy="300" r="2.5" fill="#222"/>
+      <text x="344" y="304" font-family="system-ui" font-size="11.5" font-weight="700" fill="#234">LotR 65t/9c</text>
+      <circle cx="132" cy="300" r="10" fill="none" stroke="#2e7d46" stroke-width="2.6"/><circle cx="132" cy="300" r="5" fill="#2e7d46"/>
+      <text x="132" y="285" text-anchor="middle" font-family="system-ui" font-size="11" font-weight="700" fill="#2e7d46">#682232 · 9c/45t · 87.0</text>
+    </svg>
     </div>
-    <div>
-      <div class="svgfig">
-        <!-- FIG-9: mean composite vs country count -->
-        <svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mean composite rises to a peak around 6 to 8 countries then falls as fragmentation sets in.">
+    <figcaption><b>FIG-5.</b> Where the good boards really live. The buildable winners cluster <strong>small</strong> (8–9 countries, ~40–53 territories) — right by World’s size, not the big-board region the all-war score flattered to ~95 with un-drawable hubs.</figcaption>
+  </figure>
+  <div class="findings"><div class="finding"><h4>Fewer &amp; smaller win</h4><p>8&ndash;9 countries on ~40&ndash;53 territories &mdash; right by World&rsquo;s 42. Add more and <strong>fragmentation</strong> bites: too few territories per country and one cheap country decides games.</p></div><div class="finding"><h4>Buildability is the gate</h4><p>Every territory must be <em>drawable</em>: attackable from <strong>&le;5</strong> others, bordering <strong>&le;4</strong> countries. Un-drawable cross-map &ldquo;hubs&rdquo; had inflated the old ~95 scores by ~17 points.</p></div><div class="finding"><h4>Openings, not diplomacy</h4><p>Truces, swarms and betrayal barely move a board (<strong>&plusmn;0&ndash;7</strong>). What breaks the weak ones is smart <em>setup</em> &mdash; so we rank on <strong>opening-robustness</strong>, not the random deal.</p></div><div class="finding"><h4>Score fun, not just fairness</h4><p>A flat &ldquo;fair&rdquo; board can be a dead grind. We score a live <strong>bonus-economy</strong> arc (progression) alongside fairness &mdash; the winner builds <em>and</em> stays contestable.</p></div></div>
+<div class="cols"><div><div class="svgfig"><svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mean composite rises to a peak around 6 to 8 countries then falls as fragmentation sets in.">
           <text x="0" y="18" font-family="system-ui" font-size="14" font-weight="700" fill="#222">Mean composite vs country count</text>
           <!-- axes -->
           <line x1="40" y1="250" x2="585" y2="250" stroke="#ccc"/>
@@ -637,16 +617,7 @@
             <text x="475" y="268" text-anchor="middle">9</text>
           </g>
           <text x="312" y="290" text-anchor="middle" font-family="system-ui" font-size="10.5" fill="#999">fewer countries · more territory → fairer (then fragmentation bites)</text>
-        </svg>
-      </div>
-      <figcaption><b>FIG-9.</b> Composite falls as you add countries past the sweet spot
-        (overnight <em>all-war</em>: 6c 89.7 → 9c 87.3). The country-count penalty <em>persists</em>
-        under the realistic test (r = −0.47 across 70 boards) — but there it runs through
-        opening-snowball, and 10 is the local sweet spot in the 9–11 band.</figcaption>
-
-      <div class="svgfig" style="margin-top:1rem">
-        <!-- FIG-10: opening win-rate bars (It 4, six solo) -->
-        <svg viewBox="0 0 600 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Win rate by opening strategy: small-country 57 percent dwarfs the fair share of 17 percent.">
+        </svg></div><figcaption><b>FIG-6.</b> Composite falls as you add countries past the sweet spot (all-war means 6c 89.7 &rarr; 9c 87.3); the penalty persists under the realistic test (r = &minus;0.47 across 70 boards).</figcaption></div><div><div class="svgfig"><svg viewBox="0 0 600 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Win rate by opening strategy: small-country 57 percent dwarfs the fair share of 17 percent.">
           <text x="0" y="18" font-family="system-ui" font-size="14" font-weight="700" fill="#222">Win rate by opening (fair share = 17%)</text>
           <!-- fair-share line at x for 17%: bars start x=140, width scale 360px=60% -> px per % =6 -->
           <line x1="242" y1="34" x2="242" y2="232" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="4,3"/>
@@ -677,31 +648,72 @@
             <rect x="140" y="220" width="18" height="20" rx="3" fill="#dbe9f6"/>
             <text x="166" y="235" font-size="12" fill="#555">3%</text>
           </g>
-        </svg>
-      </div>
-      <figcaption><b>FIG-10.</b> The table plays like people: simply racing the most
-        defensible country wins <strong>57%</strong> against a fair share of 17% — no
-        specialist opening beats it.</figcaption>
+        </svg></div><figcaption><b>FIG-7.</b> The table plays like people: simply racing the most defensible country wins <strong>57%</strong> against a fair share of 17% &mdash; no specialist opening beats it.</figcaption></div></div>
+<h3 class="digh">The nitty-gritty <span>&mdash; expand for the detail behind each finding</span></h3><details class="dig"><summary>The fragmentation trap &amp; the country-count sweet spot</summary><div>The single biggest unfairness driver isn&rsquo;t the fortress country everyone fears &mdash; it&rsquo;s <strong>fragmentation</strong>. Cut too few territories into too many countries (<code>territories &lt; ~5&ndash;6 &times; countries</code>) and one cheap country <em>is</em> a big slice of the map: it decides <strong>21&ndash;33%</strong> of games, they end too fast, and one play-style dominates. The penalty is real and monotonic (r = <strong>&minus;0.47</strong> across 70 boards) &mdash; which is why the buildable winners sit at <strong>8&ndash;9 countries on ~40&ndash;53 territories</strong>, not the big 75&ndash;88-territory boards the all-war score once flattered to ~95.</div></details><details class="dig"><summary>The &ldquo;false-fun&rdquo; trap &mdash; the tuning that mattered most</summary><div>The scariest result was an early one: the score happily crowned the <em>wrong</em> board. A handful of <strong>big, near-equal countries</strong> on lots of territory scored ~95 and looked perfect &mdash; but completing a country took so many conquests that the <strong>bonus economy went dead</strong>: no snowball, no build-up, just a flat grind the metric mistook for &ldquo;fair and contestable.&rdquo; The fix: push the generator <em>away</em> from equal blocks toward traditional-Risk variety (a few sprawling countries, several small defensible ones) and add a <strong>progression</strong> score &mdash; whole countries the winner already held at midgame &mdash; so a real risk/reward arc gets measured. We never rank on the composite alone again.</div></details><details class="dig"><summary>Buildability &mdash; capping attack-degree (&le;5) and bordering countries (&le;4)</summary><div>A board can be a perfectly valid graph and still be <em>un-drawable</em>. Left uncapped, the generator bred territories attackable from <strong>five, six, even seven</strong> directions &mdash; cross-map &ldquo;hubs&rdquo; you can&rsquo;t lay out as a real board, and which <em>inflated</em> the score by letting nobody fortress up. Two hard caps fix it: a territory is attackable from at most <strong>5 others</strong> (real Risk&rsquo;s busiest crossroads top out at 6) and borders at most <strong>4 distinct countries</strong>. Adding them <strong>voided the old ~95 winners</strong> (&minus;~17 composite) and forced a fresh search over ~1,400 buildable boards.</div></details><details class="dig"><summary>Diplomacy is fine &mdash; <em>openings</em> are the real test</summary><div>We stress-tested the winners properly, and the reassuring half holds: truces, swarms and betrayal barely move a board (emergent diplomacy: <strong>&plusmn;0&ndash;7 points</strong>). The <em>unreassuring</em> half is what the random army deal was hiding &mdash; once the table <strong>claims and stacks strategically at setup</strong>, the all-war ranking falls apart: weak boards drop <strong>&minus;9 to &minus;32</strong> points, and the all-war &ldquo;best&rdquo; board (90) sinks to the realistic <em>worst</em> (58).</div></details><details class="dig"><summary>The economy dial &mdash; fairness vs a rich bonus economy</summary><div>Fairness and a <em>rich bonus economy</em> genuinely trade off. The boards where winning most <em>runs through</em> completing countries are 11&ndash;12-country boards &mdash; but they cost about <strong>10 composite points</strong> of fairness. A real design knob, not a free lunch; the 9-country winner is the sweet spot that keeps a live economy without paying the full fragmentation tax.</div></details><details class="dig"><summary>A bonus you can derive &mdash; the perfect-bonus formula</summary><div>
+    <p class="eb">A bonus you can derive</p>
+    <h3>The perfect-bonus formula</h3>
+    <p class="lead2">Classic Risk's continent bonuses — 2, 2, 3, 5, 5, 7 — read like folklore. They
+      aren't: a country's reinforcement bonus falls straight out of two things you can <em>measure</em>
+      from the graph — how much ground it holds, and how exposed that ground is.</p>
+    <div class="eqn">
+      <span class="out">bonus</span> <span class="op">=</span> round(&nbsp;<span class="size">size</span>
+      <span class="op">&divide;</span> <span class="num">1.8</span> <span class="op">+</span>
+      <span class="num">&lambda;</span><span class="op">&middot;</span><span class="bord">borders</span>&nbsp;)<span class="op">,</span>
+      <span class="out">&nbsp;min&nbsp;1</span>
     </div>
-  </div>
-  <div class="update narrow">
-    <b class="tag">Update · 2026-06-21</b>
-    We rebuilt the simulator to score every finalist under an <strong>opening-robustness</strong>
-    objective (mixed strategic openings + emergent diplomacy), with proper uncertainty
-    (Wilson intervals, CRN-paired seeds, seat rotation). The verdict reshuffles this page's
-    leaderboard: the all-war scores above <em>over-state</em> a board, and the figures that
-    end <code>≈ 95</code> are all-war numbers. The standing recipe is being re-derived toward
-    a <strong>practical 9–11-country board</strong> (the search points to <strong>10
-    well-connected, even-sized countries</strong> on a modest map). <strong>FIG-1's board (an
-    11-country layout) is a placeholder</strong> and will likely be replaced once the
-    opening-robust winner is confirmed. Full trail: <code>research-paper.md</code>
-    Iterations&nbsp;12–13.
-  </div>
+    <div class="spotgrid">
+      <ul class="terms">
+        <li><span class="k size">size</span> — territories in the country: the reward for holding more ground.</li>
+        <li><span class="k num">&divide; 1.8</span> — a calibration divisor, tuned so the model lands the classic board almost exactly.</li>
+        <li><span class="k bord">borders</span> — the country's <em>entry points</em>: how many ways in you have to defend.</li>
+        <li><span class="k num">&lambda;</span> — the <b>defensive premium</b> (border-relief): at 0 the bonus is pure size; raise it and hard-to-hold, many-bordered countries get paid more.</li>
+        <li><span class="k">min 1</span> — every country is worth <em>something</em>, so none is dead weight.</li>
+      </ul>
+      <div>
+        <table>
+          <tr><th>size</th><th class="r">classic</th><th class="r"><code>size&divide;1.8</code></th></tr>
+          <tr><td>4 terr</td><td class="r">2</td><td class="r match">2 ✓</td></tr>
+          <tr><td>6 terr</td><td class="r">3</td><td class="r match">3 ✓</td></tr>
+          <tr><td>7 terr</td><td class="r">5</td><td class="r miss">4</td></tr>
+          <tr><td>9 terr</td><td class="r">5</td><td class="r match">5 ✓</td></tr>
+          <tr><td>12 terr</td><td class="r">7</td><td class="r match">7 ✓</td></tr>
+        </table>
+        <p class="note">Five of six classic bonuses land on the nose; only Europe (7 territories) comes out a troop light.</p>
+      </div>
+    </div>
+    <p class="kicker">But the number itself isn't the dial — <b>bonus&nbsp;&divide;&nbsp;borders</b> is. Push
+      that ratio too high and a country becomes a <b>turtle fortress</b> nobody can crack; too low and no
+      one bothers completing it. That single ratio — not the headline bonus — is what the sweep tunes for
+      fairness, and it's exactly the <code>&lambda;</code> knob the lab turns.</p>
+  </div></details>
+<p class="muted narrow" style="margin-top:1.5rem;font-size:.9rem">The corrected, buildable search produced the <strong>10 best 8-country and 10 best 9-country maps</strong> &mdash; browse them as <a href="viable-maps.html">physical boards</a> or the <a href="findings.html">full 20-map analysis</a>. The winner, <strong>9c/45t #682232</strong>, is the board laid out across this page. Full trail: <code>research-paper.md</code> Iterations&nbsp;12&ndash;15.</p>
 </section>
 
 <!-- ============================ §6 FROM MATRIX TO MAP ============================ -->
-<section>
+<section id="map">
   <div class="sectionhead"><span class="n">6</span><h2>From matrix to map</h2></div>
+  <figure style="margin:.4rem 0 .2rem">
+    <img src="viable-png/nodemap.png" alt="Abstract node map of the chosen board: 45 territories as nodes coloured by their 9 countries, solid edges intra-country, dashed lines cross-country borders, ringed nodes are chokepoints." style="max-width:420px;margin:0 auto">
+    <figcaption><b>FIG-8a.</b> <strong>The final matrix we arrived at</strong> — the abstract graph
+      of the chosen board (<strong>9c/45t #682232</strong>): 45 territories = nodes, colour =
+      the 9 countries, solid = intra-country adjacency, dashed = cross-country borders, ringed =
+      chokepoints. Balance is decided at this layer; everything below is a way to draw it.</figcaption>
+  </figure>
+  <figure style="margin:.4rem 0 1.2rem">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem">
+      <img src="viable-png/fig6-perm1.png" alt="Layout permutation 1 of the chosen board 9c/45t #682232.">
+      <img src="viable-png/fig6-perm2.png" alt="Layout permutation 2 of the chosen board.">
+      <img src="viable-png/fig6-perm3.png" alt="Layout permutation 3 of the chosen board.">
+      <img src="viable-png/fig6-perm4.png" alt="Layout permutation 4 of the chosen board.">
+      <img src="viable-png/fig6-perm5.png" alt="Layout permutation 5 of the chosen board.">
+      <img src="viable-png/fig6-perm6.png" alt="Layout permutation 6 of the chosen board.">
+    </div>
+    <figcaption><b>FIG-8b.</b> From that matrix we mocked up various <strong>physical
+      representations</strong> of it — accounting for natural barriers like lakes, mountains, and
+      rivers, plus sea routes to islands (composite <strong>87.0</strong>, beats World Risk;
+      buildable — every territory attackable from ≤5 others and bordering ≤4 countries).
+      <a href="viable-maps.html">All 10 viable maps →</a></figcaption>
+  </figure>
   <p class="narrow">A winning <em>graph</em> is still just data. The last step turns it into
     something you can look at and play: a deterministic <strong>layout pipeline</strong> takes
     the node graph → carves the biggest country-cluster into a mainland and cuts weak
@@ -782,125 +794,42 @@
       <text x="1005" y="316" text-anchor="middle" font-family="system-ui" font-size="11" fill="#999">editable, playable <tspan font-style="italic">MapDocument</tspan></text>
     </svg>
     </div>
-    <figcaption><b>FIG-11.</b> Graph → board → hexes. The handoff that makes a measured
+    <figcaption><b>FIG-9.</b> Graph → board → hexes. The handoff that makes a measured
       board a <em>playable</em> one.</figcaption>
   </figure>
   <figure>
-    <div class="svgfig">
-    <svg viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mock-up of the chosen board open in the hex map editor: a toolbar and tool palette, a hex board coloured by country with a selected capital and a sea route to an island, and an inspector panel showing the selected territory and board summary.">
-      <!-- app frame -->
-      <rect x="0" y="0" width="960" height="540" rx="10" fill="#eef2f6"/>
-      <!-- top bar -->
-      <rect x="0" y="0" width="960" height="40" fill="#f4f7fa" stroke="#dde3ea"/>
-      <circle cx="18" cy="20" r="4.5" fill="#e6550d"/><circle cx="34" cy="20" r="4.5" fill="#e7ba52"/><circle cx="50" cy="20" r="4.5" fill="#31a354"/>
-      <text x="72" y="25" font-family="system-ui" font-size="13" font-weight="700" fill="#234">Hex Map Editor</text>
-      <text x="208" y="25" font-family="system-ui" font-size="12" fill="#8aa">— perm-04.json</text>
-      <g font-family="system-ui" font-size="11.5">
-        <rect x="430" y="9" width="62" height="22" rx="6" fill="#3182bd"/><text x="461" y="24" text-anchor="middle" fill="#fff" font-weight="700">Select</text>
-        <rect x="498" y="9" width="54" height="22" rx="6" fill="#fff" stroke="#cdd9e3"/><text x="525" y="24" text-anchor="middle" fill="#456">Tiles</text>
-        <rect x="558" y="9" width="74" height="22" rx="6" fill="#fff" stroke="#cdd9e3"/><text x="595" y="24" text-anchor="middle" fill="#456">Decorate</text>
-        <rect x="638" y="9" width="68" height="22" rx="6" fill="#fff" stroke="#cdd9e3"/><text x="672" y="24" text-anchor="middle" fill="#456">Validate</text>
-        <!-- view toggle -->
-        <rect x="858" y="9" width="86" height="22" rx="6" fill="#eef4fb" stroke="#cdd9e3"/>
-        <rect x="858" y="9" width="43" height="22" rx="6" fill="#3182bd"/>
-        <text x="879" y="24" text-anchor="middle" fill="#fff" font-weight="700">2D</text><text x="922" y="24" text-anchor="middle" fill="#789">3D</text>
-      </g>
-
-      <!-- left tool palette -->
-      <rect x="0" y="40" width="46" height="500" fill="#f7f9fc" stroke="#dde3ea"/>
-      <g font-family="system-ui" font-size="12" font-weight="700" text-anchor="middle">
-        <rect x="10" y="58" width="26" height="26" rx="6" fill="#3182bd"/><text x="23" y="76" fill="#fff">▣</text>
-        <rect x="10" y="92" width="26" height="26" rx="6" fill="#fff" stroke="#cdd9e3"/><text x="23" y="110" fill="#789">⬡</text>
-        <rect x="10" y="126" width="26" height="26" rx="6" fill="#fff" stroke="#cdd9e3"/><text x="23" y="144" fill="#789">♣</text>
-        <rect x="10" y="160" width="26" height="26" rx="6" fill="#fff" stroke="#cdd9e3"/><text x="23" y="178" fill="#789">T</text>
-        <rect x="10" y="194" width="26" height="26" rx="6" fill="#fff" stroke="#cdd9e3"/><text x="23" y="212" fill="#789">⚑</text>
-        <rect x="10" y="228" width="26" height="26" rx="6" fill="#fff" stroke="#cdd9e3"/><text x="23" y="246" fill="#789">✓</text>
-      </g>
-
-      <!-- board canvas -->
-      <rect x="46" y="40" width="676" height="500" fill="#eaf3fb"/>
-      <!-- hexes (flat-top) -->
-      <g stroke="#fff" stroke-width="2">
-        <!-- col0 c1 -->
-        <polygon points="198,218 184,242 156,242 142,218 156,194 184,194" fill="#e6550d"/>
-        <polygon points="198,266 184,290 156,290 142,266 156,242 184,242" fill="#e6550d"/>
-        <!-- col1 c1 -->
-        <polygon points="240,194 226,218 198,218 184,194 198,170 226,170" fill="#e6550d"/>
-        <polygon points="240,242 226,266 198,266 184,242 198,218 226,218" fill="#e6550d"/>
-        <polygon points="240,290 226,314 198,314 184,290 198,266 226,266" fill="#e6550d"/>
-        <!-- col2 c2 -->
-        <polygon points="282,218 268,242 240,242 226,218 240,194 268,194" fill="#31a354"/>
-        <polygon points="282,266 268,290 240,290 226,266 240,242 268,242" fill="#31a354"/>
-        <!-- col3 c2/c3 -->
-        <polygon points="324,194 310,218 282,218 268,194 282,170 310,170" fill="#31a354"/>
-        <polygon points="324,242 310,266 282,266 268,242 282,218 310,218" fill="#3182bd"/>
-        <polygon points="324,290 310,314 282,314 268,290 282,266 310,266" fill="#3182bd"/>
-        <!-- col4 c3 -->
-        <polygon points="366,218 352,242 324,242 310,218 324,194 352,194" fill="#3182bd"/>
-        <polygon points="366,266 352,290 324,290 310,266 324,242 352,242" fill="#3182bd"/>
-        <!-- col5 c6 -->
-        <polygon points="408,194 394,218 366,218 352,194 366,170 394,170" fill="#e7ba52"/>
-        <polygon points="408,242 394,266 366,266 352,242 366,218 394,218" fill="#e7ba52"/>
-        <!-- island c4 -->
-        <polygon points="560,278 546,302 518,302 504,278 518,254 546,254" fill="#756bb1"/>
-      </g>
-      <!-- selection ring on the capital -->
-      <polygon points="198,218 184,242 156,242 142,218 156,194 184,194" fill="none" stroke="#111" stroke-width="3"/>
-      <circle cx="170" cy="218" r="5" fill="#fff" stroke="#111" stroke-width="1.5"/>
-      <!-- sea route to island -->
-      <path d="M394,242 C440,250 470,266 506,278" fill="none" stroke="#2b6f99" stroke-width="2.4" stroke-dasharray="7,5"/>
-      <!-- a couple of territory labels -->
-      <g font-family="system-ui" font-size="9.5" fill="#fff" text-anchor="middle">
-        <text x="170" y="222">T07★</text><text x="296" y="246">T31</text><text x="380" y="246">T44</text><text x="532" y="282">T80</text>
-      </g>
-      <text x="60" y="62" font-family="system-ui" font-size="11" fill="#6a89a3">Realm of perm-04 · one continent + island</text>
-
-      <!-- inspector panel -->
-      <rect x="722" y="40" width="238" height="500" fill="#fafcfe" stroke="#dde3ea"/>
-      <text x="738" y="64" font-family="system-ui" font-size="10" letter-spacing="0.12em" font-weight="700" fill="#9ab">INSPECTOR</text>
-      <text x="738" y="88" font-family="system-ui" font-size="15" font-weight="700" fill="#234">T07 · capital</text>
-      <!-- country row -->
-      <rect x="738" y="100" width="16" height="16" rx="3" fill="#e6550d"/>
-      <text x="762" y="113" font-family="system-ui" font-size="12.5" fill="#456">Realm I (Country 1)</text>
-      <!-- stats -->
-      <g font-family="system-ui">
-        <rect x="738" y="128" width="66" height="46" rx="8" fill="#fff" stroke="#e3e3e3"/>
-        <text x="771" y="150" text-anchor="middle" font-size="17" font-weight="700" fill="#3182bd">+5</text><text x="771" y="166" text-anchor="middle" font-size="10" fill="#999">bonus</text>
-        <rect x="810" y="128" width="66" height="46" rx="8" fill="#fff" stroke="#e3e3e3"/>
-        <text x="843" y="150" text-anchor="middle" font-size="17" font-weight="700" fill="#3182bd">1</text><text x="843" y="166" text-anchor="middle" font-size="10" fill="#999">borders</text>
-        <rect x="882" y="128" width="62" height="46" rx="8" fill="#eaf6ee" stroke="#9ad0ad"/>
-        <text x="913" y="150" text-anchor="middle" font-size="13" font-weight="700" fill="#2e8b50">held</text><text x="913" y="166" text-anchor="middle" font-size="10" fill="#5a9c72">6% of wins</text>
-      </g>
-      <!-- tags -->
-      <text x="738" y="196" font-family="system-ui" font-size="11" fill="#9ab">TAGS</text>
-      <rect x="738" y="202" width="118" height="20" rx="10" fill="#f7fafd" stroke="#cdd9e3"/>
-      <text x="797" y="216" text-anchor="middle" font-family="system-ui" font-size="11" fill="#456">regional_capital</text>
-      <!-- divider -->
-      <line x1="738" y1="244" x2="944" y2="244" stroke="#e3e3e3"/>
-      <!-- board summary -->
-      <text x="738" y="268" font-family="system-ui" font-size="10" letter-spacing="0.12em" font-weight="700" fill="#9ab">BOARD</text>
-      <g font-family="system-ui" font-size="12.5" fill="#456">
-        <text x="738" y="292">Territories</text><text x="944" y="292" text-anchor="end" font-weight="700" fill="#234">86</text>
-        <text x="738" y="316">Countries</text><text x="944" y="316" text-anchor="end" font-weight="700" fill="#234">11</text>
-        <text x="738" y="340">Composite</text><text x="944" y="340" text-anchor="end" font-weight="700" fill="#2e8b50">94.9</text>
-        <text x="738" y="364">Islands · sea lanes</text><text x="944" y="364" text-anchor="end" font-weight="700" fill="#234">2 · 3</text>
-      </g>
-      <line x1="738" y1="384" x2="944" y2="384" stroke="#e3e3e3"/>
-      <text x="738" y="408" font-family="system-ui" font-size="11.5" fill="#2e8b50">✓ contiguous</text>
-      <text x="738" y="428" font-family="system-ui" font-size="11.5" fill="#2e8b50">✓ attack-graph connected</text>
-      <text x="738" y="448" font-family="system-ui" font-size="11.5" fill="#2e8b50">✓ degree cap ≤ 3</text>
-      <rect x="738" y="470" width="206" height="30" rx="8" fill="#3182bd"/>
-      <text x="841" y="490" text-anchor="middle" font-family="system-ui" font-size="12.5" font-weight="700" fill="#fff">▶ Play this board</text>
-
-      <!-- status bar -->
-      <rect x="46" y="514" width="676" height="26" fill="#f4f7fa" stroke="#dde3ea"/>
-      <text x="60" y="531" font-family="system-ui" font-size="11" fill="#789">autosaved · schema v2 · graph embedded</text>
-      <text x="708" y="531" text-anchor="end" font-family="system-ui" font-size="11" fill="#789">zoom 100%</text>
-    </svg>
-    </div>
-    <figcaption><b>FIG-12.</b> The end state: a board that is <strong>fair and fun on
-      purpose</strong>, not by accident of tradition.</figcaption>
+    <img src="editor-loaded.png" alt="The chosen board 9c/45t #682232 loaded into the hex map editor, rendered in 3D: nine colour-coded countries of hex tiles on a blue sea, with islands and natural barriers — the nearly-finished, playable product.">
+    <figcaption><b>FIG-10.</b> The nearly-finished product — the chosen board loaded into the real
+      <strong>hex map editor</strong> and rendered in 3D, ready to play. The bones are measured;
+      what's left is craft.</figcaption>
   </figure>
+  <p class="narrow" style="margin-top:1.2rem">And this is where the machine bows out. The measurable
+    half — is the board <em>fair</em>, is it <em>fun</em>, is it <em>buildable</em> — is what
+    simulation can answer, and it's answered. From here the work turns <strong>artistic</strong>:
+    naming the lands, theming the terrain, hand-placing the rivers and mountains, sketching the art,
+    and tuning the feel at the table. AI got the skeleton right; giving the map a soul is a human
+    job — and that's exactly as it should be.</p>
+</section>
+
+<!-- ============================ DEEPER RESEARCH CTA ============================ -->
+<section>
+  <a class="deeper" href="viable-maps.html">
+    <div>
+      <div class="eyebrow">Deeper research →</div>
+      <h2 style="margin:.1rem 0 .3rem">Viable starter maps that beat World Risk</h2>
+      <p class="muted" style="margin:0">We rebuilt the simulator to rank boards on whether they
+        survive <em>strategic openings</em> (not the random deal), then capped each territory's
+        <strong>attack-degree (≤5)</strong> and <strong>bordering countries (≤4)</strong> so every
+        board is actually drawable — voiding the inflated earlier winners and forcing a fresh search
+        over 1,370 boards. The result: <strong>10 viable starter maps</strong> shown as physical
+        boards (layout permutations + PNGs), each beating classic World Risk.</p>
+    </div>
+    <div class="deeperStat"><b>87.0</b><span>best composite (a 9c map)<br>buildable · World 76.2</span>
+      <span class="go">See the viable maps →</span></div>
+  </a>
+  <p class="muted" style="font-size:.85rem;margin:.6rem 0 0">Also: the full
+    <a href="findings.html">20-map analysis</a> (Wilson CIs, leader-penalty curves); the full
+    journey is logged in <code>research-paper.md</code> (Iterations 12–15).</p>
 </section>
 
 </div><!-- /wrap -->
@@ -920,14 +849,27 @@
       <li><strong>The 40/60 weights are a chosen convention</strong>, not derived. A board's rank
         can move if we reweight — always read the components, not just the total.</li>
     </ul>
-    <p style="margin:.7rem 0 0;font-size:.86rem">Reproduce any figure here with the
-      <code>risk-lab</code> instrument — e.g. the baseline is
-      <code>python3 run_lab.py --games 400 --seed 1</code>; the overnight search is
-      <code>python3 explore.py --candidates 1000 --games 300</code>. Every claim traces to a
-      logged iteration in <code>research-paper.md</code>.</p>
   </div>
   <p class="muted" style="font-size:.8rem;padding-bottom:1.6rem">Risk Lab · In Search of the
     Perfect 6-Player Risk Board · a living measurement story.</p>
 </div></footer>
 
+<style> figure img, figure svg, figure .svgfig { cursor: zoom-in; } </style>
+<script>
+(function(){
+  document.addEventListener('click', function(e){
+    if (e.target.closest('a')) return;
+    var fig = e.target.closest('figure'); if(!fig) return;
+    var media = e.target.closest('img, svg') || fig.querySelector('img, svg'); if(!media) return;
+    var ov = document.createElement('div');
+    ov.setAttribute('style','position:fixed;inset:0;background:rgba(15,20,28,.86);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:zoom-out;padding:2.5vh');
+    var node = media.cloneNode(true); node.removeAttribute('style');
+    node.setAttribute('style','max-width:96vw;max-height:95vh;width:auto;height:auto;background:#fff;border-radius:8px;box-shadow:0 10px 50px rgba(0,0,0,.55)');
+    ov.appendChild(node);
+    ov.addEventListener('click', function(){ ov.remove(); });
+    document.addEventListener('keydown', function esc(ev){ if(ev.key==='Escape'){ov.remove(); document.removeEventListener('keydown',esc);} });
+    document.body.appendChild(ov);
+  });
+})();
+</script>
 </body></html>
